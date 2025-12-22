@@ -1,0 +1,9 @@
+shell Core Scripting Concepts
+Every DevOps engineer should be proficient in fundamental shell scripting concepts, typically using Bash. 
+
+    Basic Syntax: Understanding the shebang (#!/bin/bash), comments, variables, and user input (read).
+    Control Flow: Using conditional statements (if-else, elif, case) and loops (for, while, until) for decision-making and iteration.
+    Functions: Organizing reusable code blocks for modular and maintainable scripts.
+    Input/Output Redirection: Managing data streams using >,>>, <, 2>, etc..
+    Error Handling: Writing robust scripts using exit codes ($?), trap, set -e, and logging for reliable execution.
+    Command-line Utilities: Proficiency with essential Linux commands for text processing and file manipulation (grep, awk, sed, cut, find, sort, uniq). 

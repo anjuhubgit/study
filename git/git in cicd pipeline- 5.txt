@@ -1,0 +1,59 @@
+Git in cicd pipeline 
+
+That's a perfect final topic to connect the Git and Docker stories! We'll conclude Alice's DevOps journey by explaining how she fully automates her bakery's deployment using Git in her CI/CD pipeline.
+
+🤖 The Automated Bakery: Git in the CI/CD Pipeline
+Alice has excellent recipe (code) management using advanced Git and a fully containerized (Docker) application. Now, she needs to link them together to create a seamless, hands-off delivery system—Continuous Integration and Continuous Deployment (CI/CD).
+
+1. Git Hooks: The Automated Kitchen Assistants
+Before any code even leaves a developer's machine, Alice uses Git Hooks—scripts that run automatically at specific points in the Git workflow—to enforce quality.
+
+Concept: Hooks are like automated kitchen assistants who check ingredients before they are placed in the recipe book. They live in the local repository's .git/hooks directory.
+
+The pre-commit Hook (The Linter):
+
+Use Case: Alice configures a script to run a linter (a tool that checks code style) and static analysis every time a developer runs git commit.
+
+Action: If the code fails the style check (e.g., forgetting a semicolon), the hook stops the commit from happening, forcing the developer to fix the issue immediately. This keeps the recipe book clean from the start.
+
+The post-commit Hook (The Notifier):
+
+Use Case: Once a successful commit is made, a script automatically notifies the CI/CD system (e.g., Jenkins) that new changes are ready.
+
+2. Integration with CI/CD Tools: The Automated Delivery Truck
+Alice uses GitLab CI as her primary automation tool. The interaction between Git and this tool is the core of her automation.
+
+The Trigger: The entire CI/CD process begins with a Git event. When a developer runs git push to the remote repository, GitLab detects the new commit or the new Pull Request. This push is the trigger that starts the automated delivery truck.
+
+The CI Pipeline (The Quality Check):
+
+Checkout: The GitLab CI runner (a worker machine) executes a git clone or git fetch to get the latest recipe (code).
+
+Build: It uses the Dockerfile to run docker build, creating the application image.
+
+Test: It runs unit and integration tests against the built application. If any test fails, the pipeline stops immediately, and the developer is notified.
+
+The CD Pipeline (The Deployment):
+
+Artifact Creation: If the tests pass, the pipeline pushes the final, approved Docker image to the secure registry.
+
+Deployment: The pipeline then executes a command (e.g., a Kubernetes command) that tells the production cluster to pull the new image and roll it out.
+
+The Benefit: Alice no longer manually builds or deploys. Every accepted change in Git is automatically built, tested, and delivered to the customers, ensuring speed, consistency, and zero human error.
+
+3. Infrastructure as Code (IaC): Versioning the Bakery Layout
+Alice realized it wasn't enough to version control the application code; she also needed to version control the servers and networks that host the bakery. Changing a firewall rule manually could break the entire system.
+
+The Solution: Infrastructure as Code (IaC)
+
+Concept: Instead of manually clicking buttons in the cloud console, Alice defines her entire infrastructure (virtual machines, networks, databases, Kubernetes cluster configuration) using configuration files (like Terraform or Ansible).
+
+Git as the Source of Truth: These IaC configuration files are stored directly in a special Git Repository.
+
+Use Case: If Alice needs to increase the size of her database server, she doesn't use the cloud console; she edits the Terraform file in Git and commits the change.
+
+The Process: The commit triggers a specific CI/CD pipeline (the "Infrastructure Pipeline"). This pipeline ensures the change is reviewed, and then the Terraform tool automatically applies the configuration, updating the cloud infrastructure to match the desired state defined in the Git repository.
+
+The Benefit: By treating infrastructure configurations like code, Alice gains all the benefits of Git: version history, collaborative review (via PRs), and automated deployment, eliminating configuration drift and making her infrastructure reliable and repeatable.
+
+Alice's journey is complete. By combining the rigorous version control of Git with the isolation of Docker and the automation of CI/CD, she created a fully automated, scalable, and resilient digital bakery—the ultimate goal of modern DevOps.

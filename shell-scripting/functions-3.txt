@@ -1,0 +1,70 @@
+Functions
+
+In the final chapter of our journey, Script the messenger had become very successful. However, his parchment was becoming miles long. He realized he was writing the same instructions over and over again—every time he met a dragon, he had to write down the same 10 steps to calm it down.
+
+To save his ink and his sanity, Script discovered the ancient art of Functions.
+
+1. The Spellbook: Defining a Function
+Instead of writing the full instructions every time, Script created a Spellbook. He would give a name to a group of actions and wrap them in curly braces { }. This is called Defining a Function.
+
+Bash
+
+# Defining the 'Calm Dragon' spell
+calm_dragon() {
+  echo "Offering a shiny gold coin..."
+  echo "Singing a soothing lullaby..."
+  echo "Dragon is now asleep."
+}
+Now, the instructions were stored in Script’s memory, but they didn't do anything yet. They were just waiting to be called.
+
+2. The Incantation: Calling a Function
+Whenever Script actually encountered a dragon, he didn't need to write the whole list again. He simply spoke the name of the spell. This is Calling the Function.
+
+calm_dragon
+
+Just by saying that one line, the Grand Interpreter would jump back to the Spellbook, execute all the steps inside, and then return to where Script left off.
+
+3. The Magic Ingredients: Arguments
+Sometimes, a spell needs to be a little different depending on the situation. Script might meet a "Red Dragon" or a "Blue Dragon." Instead of making two separate spells, he used Arguments.
+
+Inside a function, Script uses special placeholders:
+
+$1: The first ingredient passed to the spell.
+
+$2: The second ingredient, and so on.
+
+Bash
+
+summon_beast() {
+  echo "Summoning a $1 from the $2 region!"
+}
+
+# Calling the spell with specific ingredients
+summon_beast "Griffin" "Mountain"
+summon_beast "Kraken" "Ocean"
+4. The Message Back: Return Values
+After a spell is cast, Script sometimes needs to know if it was successful. In Kernel-Land, functions send back a Return Status (a number between 0 and 255).
+
+0: Success (All is well).
+
+1 or higher: Failure (Something went wrong).
+
+Bash
+
+check_pouch() {
+  if [ $COINS -gt 0 ]; then
+    return 0  # Success!
+  else
+    return 1  # We are broke!
+  fi
+}
+Why Script Loves Functions
+By using Functions, Script’s parchment became:
+
+Modular: He could fix the "Calm Dragon" spell in one place, and it would work everywhere.
+
+Readable: His main journey looked like a simple list of big events: greet_king, cross_river, calm_dragon.
+
+Maintainable: Other messengers could read his parchment without getting lost in the details.
+
+With the power of the Shebang, Variables, Logic, and now Functions, Script has transformed from a simple messenger into a master Automation Wizard.

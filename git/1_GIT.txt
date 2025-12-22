@@ -1,0 +1,235 @@
+CHAPTER 1 – Version Control Basics
+----------------------------------
+1. What is Version Control?
+2. Centralized vs Distributed VCS
+3. Why Git?
+4. Git architecture overview
+   - Working directory
+   - Staging area
+   - Local repository
+5. Git installation
+6. Git configuration (user.name, user.email)
+
+Practice:
+- git --version
+- git config --global user.name
+- git config --global user.email
+
+
+CHAPTER 2 – Git Repository Basics
+---------------------------------
+1. git init
+2. git clone
+3. git status
+4. git add
+5. git commit
+6. git log
+7. git diff
+
+Practice:
+- Create a local repo
+- Add files
+- Commit changes
+- View commit history
+
+
+CHAPTER 3 – Branching Basics
+----------------------------
+1. What is a branch?
+2. Default branch (main/master)
+3. Creating branches
+4. Switching branches
+5. Deleting branches
+
+Commands:
+- git branch
+- git checkout
+- git switch
+- git branch -d
+
+Practice:
+- Create feature branch
+- Switch branches
+- Merge simple changes
+
+
+CHAPTER 4 – Merging & Conflicts
+-------------------------------
+1. What is merge?
+2. Fast-forward merge
+3. Three-way merge
+4. Merge conflicts
+5. Resolving conflicts manually
+
+Commands:
+- git merge
+- git mergetool
+
+Practice:
+- Create conflict scenario
+- Resolve conflict
+- Commit resolved changes
+
+
+CHAPTER 5 – Remote Repositories
+-------------------------------
+1. What is origin?
+2. git remote
+3. git push
+4. git pull
+5. git fetch
+6. Upstream branches
+
+Commands:
+- git remote -v
+- git push origin branch
+- git pull origin branch
+
+Practice:
+- Push to GitHub
+- Pull latest changes
+- Fetch without merge
+
+
+CHAPTER 6 – GitHub / GitLab Workflow
+-----------------------------------
+1. Fork vs Clone
+2. Pull Requests / Merge Requests
+3. Code reviews
+4. Branch protection rules
+5. Approvals and checks
+
+Practice:
+- Raise a PR
+- Review code
+- Merge PR
+
+
+CHAPTER 7 – Rebase (VERY IMPORTANT)
+-----------------------------------
+1. What is rebase?
+2. Merge vs Rebase
+3. Interactive rebase
+4. Squashing commits
+5. Rebase conflicts
+
+Commands:
+- git rebase
+- git rebase -i
+
+Practice:
+- Clean commit history
+- Squash commits
+- Rebase feature branch
+
+
+CHAPTER 8 – Undoing & Fixing Mistakes
+------------------------------------
+1. git reset (soft, mixed, hard)
+2. git revert
+3. git checkout file
+4. git restore
+5. git reflog
+
+Practice:
+- Undo last commit
+- Recover deleted commit
+- Reset vs revert scenarios
+
+
+CHAPTER 9 – Tags & Releases
+---------------------------
+1. Lightweight tags
+2. Annotated tags
+3. Versioning (v1.0, v1.1)
+4. Release workflow
+
+Commands:
+- git tag
+- git tag -a
+- git push --tags
+
+Practice:
+- Create release tag
+- Push tag to remote
+
+
+CHAPTER 10 – Git for DevOps Pipelines
+-------------------------------------
+1. Git branching strategy
+   - GitFlow
+   - Trunk-based
+2. Commit message standards
+3. Repo structure for DevOps
+4. Git triggers in CI/CD
+5. Webhooks
+
+Practice:
+- Branch-based pipelines
+- Tag-based deployment
+- Environment-based repos
+
+
+CHAPTER 11 – Advanced Git (Interview Level)
+-------------------------------------------
+1. git stash
+2. cherry-pick
+3. bisect
+4. submodules
+5. mono-repo vs multi-repo
+
+Practice:
+- Apply stash
+- Cherry-pick commit
+- Find bug using bisect
+
+
+CHAPTER 12 – Git Security & Best Practices
+------------------------------------------
+1. Secrets in Git (what NOT to commit)
+2. .gitignore
+3. GPG signing
+4. Access control
+5. Branch protection
+6. Pre-commit hooks
+
+Practice:
+- Setup .gitignore
+- Remove secrets from history
+- Protect main branch
+
+=================================================
+ase workflow
+
+Commands:
+- git tag
+- git tag -a
+- git push --tags
+
+Practice:
+- Create release tag
+- Push tag to remote
+
+
+CHAPTER 10 – Git for DevOps Pipelines
+-------------------------------------
+1. Git branching strategy
+   - GitFlow
+   - Trunk-based
+2. Commit message standards
+3. Repo structure for DevOps
+4. Git triggers in CI/CD
+5. Webhooks
+
+Practice:
+- Branch-based pipelines
+- Tag-based deployment
+- Environment-based repos
+
+
+CHAPTER 11 – Advanced Git (Interview Level)
+-------------------------------------------
+1. git stash
+2. cherry-pick
+3. bisect
+4. submodules

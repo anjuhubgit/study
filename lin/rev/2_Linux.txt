@@ -1,0 +1,331 @@
+CHAPTER 1 – Linux Basics & Fundamentals
+---------------------------------------
+1. What is Linux?
+2. Linux distributions (Ubuntu, RHEL, Amazon Linux)
+3. Linux kernel vs OS
+4. CLI vs GUI
+5. Shell and terminal basics
+6. Linux directory structure
+   - /, /home, /etc, /var, /usr, /bin, /opt, /tmp
+
+Practice:
+- pwd
+- ls
+- cd
+- tree
+- clear
+
+
+CHAPTER 2 – File & Directory Management
+---------------------------------------
+1. Creating files and directories
+2. Copy, move, delete files
+3. Viewing file content
+4. File wildcards
+
+Commands:
+- touch
+- mkdir / rmdir
+- cp
+- mv
+- rm
+- cat
+- less / more
+- head / tail
+- wc
+
+Practice:
+- Create directory structure
+- Copy files recursively
+- View large log files
+
+
+CHAPTER 3 – Linux Permissions & Ownership
+-----------------------------------------
+1. Users and groups
+2. File permissions (rwx)
+3. Numeric permissions (755, 644)
+4. chmod
+5. chown
+6. umask
+7. SUID, SGID, Sticky bit
+
+Commands:
+- chmod
+- chown
+- ls -l
+- id
+- umask
+
+Practice:
+- Restrict file access
+- Grant execute permission
+- Understand permission issues
+
+
+CHAPTER 4 – User & Group Management
+-----------------------------------
+1. User creation
+2. Group creation
+3. User login shell
+4. Password policies
+5. sudo access
+
+Commands:
+- useradd
+- userdel
+- groupadd
+- passwd
+- su
+- sudo
+- whoami
+- who
+
+Practice:
+- Create users
+- Assign sudo access
+- Restrict user access
+
+
+CHAPTER 5 – Process Management
+-------------------------------
+1. What is a process?
+2. Foreground vs background
+3. Process states
+4. CPU & memory usage
+5. Killing processes
+
+Commands:
+- ps
+- top / htop
+- free
+- uptime
+- kill
+- kill -9
+- jobs
+- bg / fg
+
+Practice:
+- Identify high CPU process
+- Kill stuck process
+
+
+CHAPTER 6 – Disk & Filesystem Management
+----------------------------------------
+1. Disk vs partition
+2. Filesystem types
+3. Mounting filesystems
+4. Disk usage analysis
+5. Inodes
+
+Commands:
+- df -h
+- du -sh
+- mount / umount
+- lsblk
+- blkid
+
+Practice:
+- Find disk full issue
+- Identify large files
+
+
+CHAPTER 7 – Networking Basics in Linux
+--------------------------------------
+1. IP addressing
+2. DNS resolution
+3. Ports & services
+4. Network troubleshooting
+
+Commands:
+- ip a
+- ip r
+- ifconfig
+- netstat
+- ss
+- ping
+- curl
+- wget
+- traceroute
+- nslookup
+
+Practice:
+- Check server connectivity
+- Debug port access issues
+
+
+CHAPTER 8 – Package Management
+-------------------------------
+1. What is a package manager?
+2. apt / yum / dnf
+3. Install / remove packages
+4. Repo configuration
+
+Commands:
+- apt update
+- apt install
+- yum install
+- rpm -qa
+
+Practice:
+- Install nginx
+- Remove unused packages
+
+
+CHAPTER 9 – Services & System Management
+----------------------------------------
+1. What is systemd?
+2. Services lifecycle
+3. Enable/disable services
+4. System boot targets
+
+Commands:
+- systemctl start
+- systemctl stop
+- systemctl restart
+- systemctl status
+- systemctl enable
+- journalctl
+
+Practice:
+- Manage web server service
+- Debug failed service
+
+
+CHAPTER 10 – Shell Scripting Basics
+-----------------------------------
+1. Bash basics
+2. Variables
+3. Conditions
+4. Loops
+5. Functions
+6. Exit codes
+
+Practice:
+- Write backup script
+- Health check script
+- Disk alert script
+
+
+CHAPTER 11 – Text Processing (VERY IMPORTANT)
+---------------------------------------------
+1. grep
+2. awk
+3. sed
+4. cut
+5. sort
+6. uniq
+7. tr
+
+Practice:
+- Parse logs
+- Extract fields
+- Replace text in files
+
+
+CHAPTER 12 – Cron Jobs & Scheduling
+-----------------------------------
+1. What is cron?
+2. Crontab syntax
+3. System cron vs user cron
+4. Logging cron jobs
+
+Commands:
+- crontab -e
+- crontab -l
+
+Practice:
+- Schedule backup
+- Run health check every 5 mins
+
+
+CHAPTER 13 – Linux Security Basics
+----------------------------------
+1. SSH basics
+2. SSH keys
+3. Disable root login
+4. Firewall basics
+5. SELinux basics (intro)
+
+Commands:
+- ssh
+- ssh-keygen
+- scp
+- firewall-cmd
+- ufw
+
+Practice:
+- Setup key-based SSH
+- Secure server access
+
+
+CHAPTER 14 – Linux Troubleshooting (INTERVIEW GOLD)
+---------------------------------------------------
+1. Server not reachable
+2. Disk full
+3. High CPU usage
+4. Memory leak
+5. Service down
+6. Permission denied issues
+
+Practice:
+- Real production scenarios
+- Root cause analysis
+
+=================================================
+-----------------------------------
+1. grep
+2. awk
+3. sed
+4. cut
+5. sort
+6. uniq
+7. tr
+
+Practice:
+- Parse logs
+- Extract fields
+- Replace text in files
+
+
+CHAPTER 12 – Cron Jobs & Scheduling
+-----------------------------------
+1. What is cron?
+2. Crontab syntax
+3. System cron vs user cron
+4. Logging cron jobs
+
+Commands:
+- crontab -e
+- crontab -l
+
+Practice:
+- Schedule backup
+- Run health check every 5 mins
+
+
+CHAPTER 13 – Linux Security Basics
+----------------------------------
+1. SSH basics
+2. SSH keys
+3. Disable root login
+4. Firewall basics
+5. SELinux basics (intro)
+
+Commands:
+- ssh
+- ssh-keygen
+- scp
+- firewall-cmd
+- ufw
+
+Practice:
+- Setup key-based SSH
+- Secure server access
+
+
+CHAPTER 14 – Linux Troubleshooting (INTERVIEW GOLD)
+---------------------------------------------------
+1. Server not reachable
+2. Disk full
+3. High CP

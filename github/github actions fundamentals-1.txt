@@ -1,0 +1,85 @@
+github actions fundamentals
+
+That’s a great idea! Let's explain GitHub Actions through a story about the CloudWeavers company, where Alex the Alchemist now works with a continuous integration specialist named Zara.
+
+🤖 Zara and the Automated Assembly Line (GitHub Actions)
+Alex’s Terraform configurations were excellent, but deploying them still required Alex to manually run the terraform apply command. The moment code was merged into the main branch, deployment should happen automatically. This is where Zara, the Automation Architect, stepped in with a plan to build an automated assembly line using GitHub Actions.
+
+Part I: The Core Components of the Assembly Line
+Zara explained that the automation relies on five core concepts:
+
+Workflows (The Assembly Line): This is the entire automated process, defined in a YAML file inside the repository's .github/workflows folder.
+
+"A Workflow is the complete assembly line, defining the sequence of all the work we need to do."
+
+Events (The Starting Pistol): Workflows are triggered by Events.
+
+"Events are the triggers. It might be a developer pushing code, creating a pull request, or a schedule (like running a daily backup)."
+
+Jobs (The Stations): The assembly line is divided into independent stations called Jobs.
+
+"A Job is a large task, like 'Run Tests' or 'Deploy Infrastructure.' Jobs run in parallel by default, making things fast, but they can be set to run sequentially if needed (e.g., 'Deploy' must only run after 'Test' finishes)."
+
+Steps (The Instructions): Each job is a list of sequential instructions called Steps.
+
+"A Step is a single instruction. It can be running a shell command (npm install), or executing an Action."
+
+Actions (The Pre-Built Tools): Instead of writing custom scripts for common tasks, Zara used pre-built Actions.
+
+"An Action is a small, reusable, pre-packaged script created by the community or GitHub, like actions/checkout (to get the code) or aws-actions/configure-aws-credentials (to authenticate). They are the pre-built power tools for the assembly line."
+
+Runners (The Workers): The execution environment where the jobs run.
+
+"The Runner is the worker machine executing the steps. We mostly use GitHub-hosted runners (virtual machines provided by GitHub), but for specialized tasks or private networks, we can use self-hosted runners."
+
+Part II: The Blueprint and the Logic
+Zara showed Alex the core of the assembly line—the YAML syntax.
+
+Workflow Syntax: The .yml file defines the name of the workflow and the on event that triggers it. Inside, the jobs section defines the sequence and structure of the work.
+
+YAML
+
+name: CloudWeavers CI/CD Pipeline
+on: 
+  push:
+    branches: [ main ] # Trigger on push to main branch
+  pull_request: 
+    branches: [ main ] # Also trigger on pull requests
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # ... steps go here
+Variables, Expressions, and Contexts: For dynamic behavior, Zara used special syntax.
+
+Expressions: Used to perform logic, such as skipping a step using if: ${{ github.event_name == 'pull_request' }}.
+
+Contexts: Workflows can access rich data bundles (Contexts). For example, github provides metadata about the trigger event, like the branch name (${{ github.ref }}). env provides access to environment variables.
+
+Variables: Custom variables could be set and reused throughout the workflow, keeping the code clean.
+
+Part III: Secure Storage and Efficiency
+Two critical components ensured the assembly line was secure and fast:
+
+1. Secrets and Environment Variables
+The deployment job needed the AWS access key to run the Terraform apply, but that key could never be stored directly in the YAML file.
+
+Secrets: Zara stored the sensitive AWS Access Key ID and Secret Access Key as Secrets in the GitHub repository settings.
+
+"Secrets are encrypted vaults for sensitive data. They are never written to the logs and are only exposed to the runner during execution via the syntax secrets.AWS_SECRET_ACCESS_KEY."
+
+Environment Variables: General, non-sensitive variables (like the deployment region us-east-1) were stored as Environment Variables (using the env: keyword), making them easy to change per job or step.
+
+2. Artifacts and Caching
+The assembly line needed to build the application code, run tests, and then deploy it.
+
+Artifacts (Handing over the Package): The 'Build' job created the application package (e.g., a .zip file), but the 'Deploy' job needed that package.
+
+"An Artifact is a way to persist and share files between separate jobs in a workflow, or to store them in GitHub for later download. The 'Build' job uses the actions/upload-artifact action, and the 'Deploy' job uses actions/download-artifact."
+
+Dependency Caching (Speeding up Setup): The npm install step in the 'Build' job often took 30 seconds to download dependencies.
+
+"We use Caching to store the contents of dependency directories (like the node_modules folder) after the first run. For subsequent runs, if the dependency file (like package-lock.json) hasn't changed, the dependencies are restored from the cache in seconds, dramatically speeding up the workflow."
+
+By implementing this intricate assembly line using GitHub Actions, Zara automated the entire process. Now, the moment Alex or any developer merged code into the main branch, the Workflow was triggered, tests ran, the Terraform plan was checked, and the infrastructure was automatically deployed. Alex could finally focus on optimization, knowing the deployments were fast, secure, and consistently executed by Zara’s automated workers.

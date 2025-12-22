@@ -1,0 +1,69 @@
+control flow 
+
+In the next chapter of our tale, Script the messenger reaches the Crossroads of Logic. The path is no longer a straight line; now, he must make choices and sometimes walk in circles to get the job done.
+
+1. The Gatekeeper’s Choice: If, Elif, and Else
+As Script approaches the Great Gate of Kernel-Land, he meets a Gatekeeper who uses Conditional Statements to decide who enters.
+
+if: The primary rule. "If you have the key, come in."
+
+elif (Else-If): The backup rule. "If you don't have the key, but you have a royal pass, come in."
+
+else: The final result. "If you have neither, go away!"
+
+In the language of the kingdom, it looks like this:
+
+Bash
+
+if [ $HAS_KEY == "yes" ]; then
+  echo "Welcome home!"
+elif [ $HAS_PASS == "yes" ]; then
+  echo "You may enter with your pass."
+else
+  echo "Access denied!"
+fi
+Important: Every if decree must be closed with fi (which is "if" spelled backward), signaling the end of that specific decision.
+
+2. The Grand Hall of Masks: The Case Statement
+Sometimes, Script meets a large crowd of different people (merchants, knights, wizards). Using if-elif-elif-elif would make his parchment too long. Instead, he uses a case statement—like a room with many doors.
+
+Bash
+
+case $USER_TYPE in
+  "Knight") echo "To the armory!" ;;
+  "Wizard") echo "To the library!" ;;
+  "Merchant") echo "To the market!" ;;
+  *) echo "I don't know you." ;;
+esac
+The *) is the "default" door for anyone who doesn't fit the other descriptions.
+
+3. The Farmer’s Field: The For Loop
+Script moves on to the royal farms. The farmer has a row of baskets, and Script must put an apple in each one. This is a for loop. It’s used when you know exactly how many times you need to do something.
+
+Bash
+
+for BASKET in 1 2 3 4 5
+do
+  echo "Dropping an apple into basket number $BASKET"
+done
+4. The Leaky Boat: While and Until Loops
+Finally, Script must cross the Great River in a leaky boat. He has to use Iteration (repeating an action) based on a condition.
+
+while: "Keep doing this as long as the condition is true."
+
+While there is water in the boat, scoop it out!
+
+until: "Keep doing this until the condition becomes true."
+
+Until the boat is dry, keep scooping!
+
+Bash
+
+# While example
+while [ $WATER_LEVEL -gt 0 ]
+do
+  echo "Scooping water..."
+  ((WATER_LEVEL--))  # Removing water
+done
+The Story So Far...
+Script has learned to check credentials at the gate, sort crowds into doors, and repeat tasks until the work is finished. With these powers, he is no longer just a messenger—he is a Governor of Logic.

@@ -1,0 +1,15 @@
+Input Output redirection 
+
+In the final corner of Kernel-Land, Script discovered that he didn't always have to shout his messages to the wind or listen to villagers one by one. He learned the art of Redirection—the ability to bend the flow of information like a river.In this kingdom, there are three main pipes (streams) attached to every script:
+Standard Input (STDIN / 0): The ear that listens for instructions.
+Standard Output (STDOUT / 1): The mouth that speaks the results.
+Standard Error (STDERR / 2): The separate mouth that screams when something goes wrong.
+1. The Ink Well: Overwriting (>)One day, Script wanted to record a message in the Great Archives (a file). Instead of just saying it out loud, he used the > funnel.echo "The dragon is sleeping." > archive.txtThe > funnel is very powerful—it clears out the old parchment in archive.txt and replaces it entirely with the new message. If the file doesn't exist, it creates it.
+
+2. The Growing Scroll: Appending (>>)Script realized that using > wiped away his history. To keep a running log of his journey without deleting the past, he used the >> funnel.echo "Found 10 gold coins." >> journey_log.txtThe >> funnel gently adds the new line to the very bottom of the scroll, keeping everything above it safe.
+
+3. The Magic Listener: Input Redirection (<)Sometimes, Script didn't want to wait for a user to type. He wanted to read a list of names directly from a scroll. For this, he used the < funnel to feed a file into a command.read SECRET_CODE < vault_key.txtInstead of Script’s "ear" listening to the keyboard, it "listens" directly to the contents of the file.
+
+4. The Wall of Silence: Error Redirection (2>)Occasionally, Script would try to do something impossible, like looking into a locked chest. This would cause a loud, messy error to appear on the screen. To keep the screen clean, Script sent those errors to a separate "trash bin" using 2>.ls /locked_vault 2> error_log.txtThe 2 represents the Standard Error pipe.By sending it to /dev/null (the kingdom's black hole), he could make errors disappear entirely:ls /locked_vault 2> /dev/null[Image showing a script redirecting standard output to one file and standard error to another file]
+
+5. The Great Pipeline: Pipes (|)The most magical tool Script found was the Pipe (|). It allowed him to take the "mouth" (Output) of one command and plug it directly into the "ear" (Input) of another.cat kingdom_roster.txt | grep "Wizard"Instead of saving a file and reopening it, the information flows instantly from one command to the next like a relay race.The Master’s Summary TableSymbolNameAction>Redirect OutputOverwrites a file with new data.>>Append OutputAdds data to the end of a file.<Redirect InputReads data from a file into a command.2>Redirect ErrorSends error messages to a file.``The PipeScript now knows how to speak, listen, and even filter out his own mistakes. He is ready to automate the entire kingdom!

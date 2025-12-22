@@ -1,0 +1,90 @@
+Error handling
+
+In the final chapter of our saga, Script became a seasoned professional. He realized that in the wild world of Kernel-Land, things often go wrong: files disappear, servers sleep, and bridges wash away. To keep the kingdom running, Script had to learn Error Handling—the art of failing gracefully.
+
+1. The Scout’s Report: Exit Codes ($?)
+Every time Script finishes a task, he leaves behind a hidden number called an Exit Code.
+
+0 means "Mission Accomplished!"
+
+1 to 255 means "Something went wrong!" (The number tells you exactly what).
+
+To check the result of his last task, Script looks into the magical mirror of $?.
+
+Bash
+
+cp maps.txt /backup/
+if [ $? -eq 0 ]; then
+  echo "The maps are safe!"
+else
+  echo "The backup failed! Alert the King!"
+fi
+2. The Panic Button: set -e
+By default, Script is very stubborn. If he hits a mistake on line 5, he will still try to finish the rest of the parchment, which can cause a disaster!
+
+To prevent this, Script writes a special decree at the top of his parchment: set -e. This tells the Grand Interpreter: "If any command fails, stop everything immediately and go home."
+
+Bash
+
+#!/bin/bash
+set -e  # The 'Exit on Error' shield
+
+# If this line fails, the script dies here and won't delete the palace!
+cd /non_existent_folder
+rm -rf * ```
+
+---
+
+### 3. The Safety Net: The `trap` Command
+Sometimes, Script is carrying sensitive items—like a lit torch or an open bottle of ink. If he trips and falls (errors out), he needs to clean up his mess before he leaves. He uses a **`trap`**.
+
+A `trap` is a set of instructions triggered by a specific signal, like an error (**ERR**) or the script ending (**EXIT**).
+
+```bash
+cleanup() {
+  echo "Extinguishing torches and closing ink bottles..."
+  rm -f /tmp/temporary_key.txt
+}
+
+# "If I exit for any reason, run the cleanup function first!"
+trap cleanup EXIT
+4. The Royal Scribe: Logging
+In a large kingdom, "Success" or "Failure" isn't enough information. Script learned to keep a Logbook so the Royal Architects could see exactly what happened while they were asleep.
+
+Instead of just shouting to the screen, Script redirects his thoughts to a log file, adding timestamps for clarity.
+
+Bash
+
+LOG_FILE="/var/log/script_journey.log"
+
+log_message() {
+  # The 'date' command adds the timestamp
+  echo "$(date '+%Y-%m-%d %H:%M:%S') - $1" >> "$LOG_FILE"
+}
+
+log_message "Started the Great Migration."
+# ... script does work ...
+log_message "Migration completed successfully."
+The "Bulletproof" Script Blueprint
+When Script combines all these powers, his parchment looks like this:
+
+Bash
+
+#!/bin/bash
+set -e          # Stop on errors
+set -u          # Stop if a variable is empty/undefined
+
+# 1. The Safety Net
+trap 'echo "An error occurred on line $LINENO! Cleaning up..."; exit 1' ERR
+
+# 2. The Reusable Logic
+log_it() {
+  echo "[$(date)] $1"
+}
+
+# 3. The Mission
+log_it "Attempting to open the vault..."
+ls /vault/treasure > /dev/null
+
+log_it "Mission Successful."
+With these tools, Script is no longer just a messenger—he is a System Guardian, capable of surviving the harshest conditions in Kernel-Land.
