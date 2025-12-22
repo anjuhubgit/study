@@ -1,0 +1,42 @@
+
+Core Docker Concepts:
+
+    Containerization Fundamentals:
+    Understanding what containers are, their benefits, and how they differ from virtual machines.
+    Docker Engine and Architecture:
+    Knowledge of the Docker daemon, client, images, containers, registries (like Docker Hub), and volumes.
+    Basic Docker Commands:
+    Proficiency in commands for managing images (docker pull, docker build, docker push), containers (docker run, docker start, docker stop, docker rm), and volumes (docker volume create, docker volume ls).
+    Docker Images and Dockerfiles:
+    Creating custom Docker images using Dockerfiles, understanding common instructions (e.g., FROM, RUN, COPY, CMD, ENTRYPOINT), and optimizing image size.
+    Docker Networking:
+    Understanding different network drivers (bridge, host, overlay) and how containers communicate with each other and the outside world.
+    Data Persistence:
+    Managing data in containers using volumes and bind mounts to ensure data survives container lifecycles. 
+
+Advanced Docker for DevOps:
+
+    Docker Compose:
+    Defining and running multi-container Docker applications using docker-compose.yml for local development and testing.
+    Container Orchestration:
+        Docker Swarm: Understanding Docker's native orchestration tool for deploying and managing a cluster of Docker nodes.
+        Kubernetes (K8s): While not exclusively Docker, Kubernetes is the industry standard for container orchestration in production, and understanding its fundamentals (pods, deployments, services, ingress) is crucial for a DevOps role. 
+    CI/CD Integration:
+    Integrating Docker into continuous integration and continuous delivery pipelines using tools like Jenkins, GitLab CI/CD, or Azure DevOps to automate building, testing, and deploying containerized applications.
+    Docker Security:
+    Implementing security best practices for Docker images and containers, including image scanning, managing secrets, and configuring secure registries.
+    Monitoring and Logging:
+    Understanding how to monitor Docker containers and collect logs for troubleshooting and performance analysis using tools like Prometheus, Grafana, or ELK stack.
+    Cloud Deployment:
+    Deploying Dockerized applications to cloud platforms like AWS ECS, Azure AKS, or Google Kubernetes Engine (GKE). 
+
+Prerequisites & Related Skills:
+
+    Linux Fundamentals:
+    A solid understanding of Linux command-line operations is essential as Docker is heavily used in Linux environments.
+    Version Control (Git):
+    Proficiency in Git for managing source code and Dockerfiles.
+    Scripting:
+    Basic scripting skills (e.g., Bash, Python) for automating Docker-related tasks.
+    YAML:
+    Understanding YAML syntax for configuring Docker Compose files and Kubernetes manifests.

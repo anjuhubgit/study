@@ -1,0 +1,40 @@
+Terraform
+1. Terraform Fundamentals & Core Concepts
+2. Terraform CLI & Commands
+3. Configuration & Language Features
+4. State Management & Backends
+5. Modules & Reusability
+
+
+1. Terraform Fundamentals & Core Concepts:
+
+    Infrastructure as Code (IaC):
+    Understand the principles and benefits of managing infrastructure through code.
+    Terraform's Purpose & Workflow:
+    Grasp why Terraform is used, its role in IaC, and the write-plan-apply workflow.
+    HashiCorp Configuration Language (HCL):
+    Learn the syntax for defining resources, variables, outputs, and modules.
+    Terraform Providers:
+    Understand how providers integrate Terraform with various cloud platforms (AWS, Azure, GCP) and other services. 
+
+2. Terraform CLI & Commands:
+
+    Core Commands: Master init, plan, apply, destroy, refresh, validate, fmt.
+    Advanced Commands: Explore taint, import, graph, and state manipulation commands. 
+
+3. Configuration & Language Features:
+
+    Variables: Learn to use input, output, and local variables for flexible configurations.
+    Expressions & Functions: Understand string interpolation, loops (for_each, count), and conditional expressions.
+    Dynamic Blocks: Create dynamic configurations using conditional logic and iteration. 
+
+4. State Management & Backends:
+
+    Terraform State: Understand its role in tracking infrastructure changes.
+    Remote State Backends: Learn to use remote storage (e.g., AWS S3, Azure Blob Storage) for collaborative and secure state management.
+    State Locking: Implement mechanisms like DynamoDB for state locking to prevent concurrent modifications. 
+
+5. Modules & Reusability:
+
+    Terraform Modules: Understand how to create and use reusable modules for organizing and standardizing configurations.
+    Terraform Registry: Leverage pre-built modules for common infrastructure patterns.

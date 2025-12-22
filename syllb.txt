@@ -1,0 +1,89 @@
+Linux
+1. Linux Basics & File System
+2. User and Group Management
+3. Networking in Linux
+4. Process and Service Management
+5. Package Management
+6. File Permissions & Ownership
+7. Disk Management & LVM -- not required as of 
+
+
+
+git 
+1. Git Fundamentals
+2. Branching and Merging
+3.Advanced Git Operations
+4. Remote Repositories and Collaboration
+5. Git in CI/CD Pipelines
+6. Best Practices and Troubleshooting
+
+
+1. Git Fundamentals:
+
+    Version Control Concepts: Understand the purpose of version control, distributed vs. centralized systems, and the Git workflow (working directory, staging area, local repository).
+    Basic Git Commands: 
+
+Code
+
+    git init
+    git add
+    git commit
+    git status
+    git log
+    git diff
+
+    Repositories: Creating, cloning, and managing local and remote repositories.
+    Ignoring Files: Using .gitignore to exclude unwanted files from version control. 
+
+2. Branching and Merging:
+
+    Branching Concepts: Understanding the purpose and benefits of branching for parallel development and feature isolation.
+    Branch Management Commands: 
+
+Code
+
+    git branch
+    git checkout
+    git merge
+
+    Merge Conflicts: Resolving conflicts that arise during merging.
+    Git Workflows: Familiarity with common workflows like Gitflow, Feature Branching, and Trunk-Based Development. 
+
+3. Advanced Git Operations:
+
+    Rebasing:
+    Understanding the concept and use cases of git rebase for cleaning up commit history.
+    Cherry-Picking:
+    Applying specific commits from one branch to another using git cherry-pick.
+    Stashing:
+    Temporarily saving changes using git stash.
+    Resetting and Reverting:
+    Understanding git reset and git revert for undoing changes and managing history.
+    Tagging:
+    Using git tag for marking significant points in the repository's history (e.g., releases). 
+
+4. Remote Repositories and Collaboration:
+
+    Working with Remotes: Adding, fetching, pulling, and pushing to remote repositories (e.g., GitHub, GitLab, Azure Repos).
+    Pull Requests/Merge Requests: Understanding and utilizing these for code review and collaboration.
+    Forks: Working with forks in open-source projects. 
+
+5. Git in CI/CD Pipelines:
+
+    Git Hooks:
+    Understanding and using pre-commit, post-commit, and other hooks for automating tasks.
+    Integration with CI/CD Tools:
+    How Git interacts with tools like Jenkins, GitLab CI, GitHub Actions, Azure DevOps Pipelines for automated builds, tests, and deployments.
+    Infrastructure as Code (IaC):
+    Using Git to version control infrastructure configurations (e.g., Terraform, Ansible playbooks). 
+
+6. Best Practices and Troubleshooting:
+
+    Commit Message Conventions: Writing clear and concise commit messages.
+    Handling Large Files: Strategies for managing large files in Git (e.g., Git LFS).
+    Security: Managing sensitive information and credentials securely within Git repositories.
+    Troubleshooting Common Git Issues: Debugging and resolving common problems like detached HEAD, untracked files, etc.
+	
+	
+	
+	
