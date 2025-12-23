@@ -1,0 +1,69 @@
+CHAPTER 7 – Networking Basics in Linux story
+--------------------------------------
+
+In the kingdom of Data-Land, communication is handled by the Royal Post Office. 
+CHAPTER 7 follows the story of a young messenger named Packet as he learns how to deliver messages across the realm.
+
+1. IP Addressing: The Home AddressTo deliver a letter, Packet needs a house number. In Linux, this is the IP Address.
+Definition: A unique numerical label assigned to each device connected to a computer network.
+Static vs. Dynamic: Some houses have permanent addresses (Static), while others change every time a new tenant moves in (Dynamic/DHCP).
+
+2. DNS Resolution: The PhonebookPacket doesn't always know the numerical address of the "Grand Bakery." He only knows the name. To find the house number, he visits the DNS (Domain Name System) clerk.
+Definition: The process of translating human-friendly names (www.google.com) into machine-readable IP addresses (142.250.190.46).
+The Story: Packet asks, "Where is the Bakery?" The DNS clerk checks the phonebook and says, "Go to 192.168.1.50."
+
+3. Ports & Services: The Apartment NumbersOnce Packet reaches the correct building (the IP), he sees many doors. These are Ports.
+Definition: A port is a communication endpoint. Specific Services live behind specific doors.
+The Story: Door 80 is the Web Server (HTTP), Door 22 is the Security Guard (SSH), and Door 443 is the Secure Web Server (HTTPS). If Packet goes to the wrong door, the service won't answer.
+
+4. Network Troubleshooting: The Messenger’s ToolkitSometimes, Packet gets lost or a bridge is down. To find the problem, he uses his Master Toolkit:Phase 1: Self-Inspection (Where am I?) 
+ip a: Packet looks at his own badge to see his IP address and see if his "legs" (network interfaces) are working.
+ifconfig: An older version of the badge (deprecated but still used in many kingdoms).
+ip r: Packet checks his "Route" map to see which gate (Gateway) he needs to exit to reach the outside world.
+
+Phase 2: Scouting the Path (Is anyone there?)
+ping: Packet throws a small stone at a house. If they throw it back, he knows they are awake.
+traceroute: Packet tracks his journey, noting every bridge and village he passes to see exactly where the road is blocked.
+
+Phase 3: Investigating the Building (What's open?)
+netstat or ss: Packet checks which doors (ports) in his own castle are currently open and who is talking through them. ss is the modern, faster way to do this.
+Phase 4: Asking the Clerk
+nslookup: Packet goes back to the DNS clerk to ask, "Is your phonebook up to date? What is the address for this name?"
+
+Phase 5: Grabbing the Goods
+curl: Packet goes to a door, asks for the contents of a page, and reads it out loud immediately.
+wget: Packet goes to a door, takes the entire scroll, and brings it home to save it in his library.
+Interview Summary TableCommandInterview Definition
+ip a Displays all network interfaces and IP addresses.
+ip r Shows the routing table (how traffic leaves the system).
+ss / netstat Investigates socket statistics and active network connections/ports.
+traceroute Identifies the path taken by packets and locates network bottlenecks.
+curl / wget Command-line tools to transfer data from or to a server (HTTP/FTP).
+
+Networking Basics in Linux - defination and explain wrt to interview
+
+In a technical interview, networking questions test your ability to understand how data moves and how to fix the "pipes" when they break. Here is how to define these concepts and commands with professional precision.
+1. IP AddressingDefinition: An Internet Protocol (IP) Address is a unique numerical identifier assigned to every device on a network. It functions as the logical address used for routing packets across network boundaries.
+Interview Insight: Be prepared to distinguish between IPv4 (32-bit, e.g., 192.168.1.1) and IPv6 (128-bit, e.g., 2001:db8::1). Mention DHCP (Dynamic) vs. Static addressing and the importance of the Subnet Mask in defining network boundaries.
+
+2. DNS ResolutionDefinition: Domain Name System (DNS) is the hierarchical system that translates human-readable domain names (like google.com) into machine-readable IP addresses.
+Interview Insight: Explain the flow: Recursive Resolver $\rightarrow$ Root Server $\rightarrow$ TLD Server $\rightarrow$ Authoritative Nameserver. If asked how Linux handles this locally, mention the /etc/hosts file and the /etc/resolv.conf configuration.
+
+3. Ports & ServicesDefinition: A Port is a logical communication endpoint used to direct traffic to a specific Service or application on a server.Interview Insight: Ports range from $0$ to $65535$. Mention "Well-Known Ports" ($0-1023$) such as SSH (22), HTTP (80), and HTTPS (443). A service "listens" on a port, waiting for incoming requests.
+
+4. Network TroubleshootingDefinition: The systematic process of isolating connectivity issues across the OSI model layers, typically starting from the Physical layer up to the Application layer.
+
+Interview Insight: Use a "Bottom-Up" approach. First, check local connectivity (Layer 3: ping, ip a), then routing (Layer 3: ip r), then service availability (Layer 4: ss, netstat), and finally application response (Layer 7: curl).
+Technical Command   & Interview Context 
+ip a IP Address: The modern tool to view and configure interfaces. Shows IP, MAC address, and state (UP/DOWN).
+
+ip r IP Route: Displays the kernel routing table. Vital for checking the Default Gateway.
+
+ifconfig Interface Config: The legacy version of ip a. Mention that it is deprecated in favor of the iproute2 suite.
+netstat Network Statistics: Shows active connections and listening ports. Often replaced by ss.
+ss Socket Statistics: A faster, more detailed replacement for netstat to investigate open ports.
+ping ICMP Echo: Tests end-to-end reachability and latency between two nodes.
+traceroute Path Trace: Shows every "hop" (router) a packet takes to reach a destination. Used to find where a connection fails.
+nslookup Name Server Lookup: Used specifically to query DNS servers and verify name resolution.
+curl Client URL: A tool to transfer data. Used in interviews to show how to test an API or Web Server from the CLI.
+wget Web Get: Primarily used for non-interactive downloading of files via HTTP, HTTPS, or FTP.
