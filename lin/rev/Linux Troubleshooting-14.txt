@@ -1,0 +1,77 @@
+CHAPTER 14 – Linux Troubleshooting (INTERVIEW GOLD) - story
+In the Kingdom of Data, the Great Server Tower suddenly began to shake. The King’s favorite website was down, and the villagers were panicking. The King summoned the Master Troubleshooter, a wizard known for fixing the unfixable.
+Here is how the wizard handled the six great calamities of the tower:
+________________________________________
+1. Server Not Reachable: The Broken Bridge
+The wizard tried to send a messenger to the tower, but the messenger never returned. "The bridge is out!" the wizard shouted. To investigate, he used his spying glass (Ping) to see if the tower was even standing. Then, he followed the messengers' path (Traceroute) to see exactly where they got lost. He found that a Firewall Gate had been accidentally slammed shut, blocking all traffic. He signaled the guards to open the gate, and the path was restored.
+•	The Tools: ping, traceroute, telnet.
+2. Disk Full: The Overstuffed Closet
+The tower started groaning under its own weight. "The storage rooms are bursting!" the wizard observed. He used a Scanning Spell (df -h) to see which floor was full. He found a closet overflowing with old scrolls (Log files) that hadn't been cleared in years. He performed a *cleanup ritual (du -sh ) to find the biggest piles and tossed the useless ones into the incinerator.
+•	The Tools: df (Disk Free), du (Disk Usage).
+3. High CPU Usage: The Exhausted Blacksmith
+The tower’s blacksmiths were hammering so fast their hammers were glowing red. "They are working too hard!" the wizard cried. He looked at the Master Registry (top/htop) and saw one rogue worker (a runaway process) trying to forge a million swords at once. The wizard tapped the worker on the shoulder and told him to Rest (kill -15) or, if he refused, he used the Erasure Spell (kill -9).
+•	The Tools: top, htop, ps aux.
+4. Memory Leak: The Unreturned Books
+The Tower Library was running out of table space. The wizard noticed that many scholars were taking books off the shelves but never putting them back. Eventually, there was no room left for new readers. This was a Memory Leak. The wizard had to identify the "Forgetful Scholars" (leaky applications) and restart their sessions so the books would return to the shelves.
+•	The Tools: free -m, vmstat, top.
+5. Service Down: The Sleeping Guard
+The Kingdom's "Mail Delivery Service" simply stopped working. The wizard went to the service station and saw the guards were fast asleep. He checked the Service Logbook (journalctl) to see why they had fainted. It turned out they ran out of "ink" (a missing config file). He provided the ink and gave the guards a Jolt of Energy (systemctl restart) to get them back to work.
+•	The Tools: systemctl status, journalctl -u [service].
+6. Permission Denied: The Wrong Key
+A scribe tried to enter the Royal Archives but was blocked. "I have a key!" the scribe argued. The wizard inspected the Door Plate (ls -l) and realized the door was set to "Royalty Only," but the scribe was just a "Commoner." The wizard had to decide whether to Change the Lock (chmod) or Change the Owner (chown) so the scribe could finally do his job.
+•	The Tools: chmod, chown, ls -l.
+________________________________________
+The Troubleshooter’s Golden Rule
+The wizard always told his apprentices: "Before you change anything, check the Ancient Scrolls of History (Logs). They always tell the story of how the fire started."
+
+
+CHAPTER 14 – Linux Troubleshooting (INTERVIEW GOLD) - interview perspective
+In a Linux interview, troubleshooting questions are "Scenario-Based." The interviewer isn't just checking if you know the command; they are checking your methodology. Always follow the "Check → Isolate → Fix" pattern.
+________________________________________
+1. Server Not Reachable
+Interview Approach: Differentiate between "Network Down" and "Service Unreachable."
+•	Step 1 (Layer 3): Use ping <IP> to check basic connectivity (ICMP).
+•	Step 2 (Path): Use traceroute to see where packets are dropping.
+•	Step 3 (Port/Layer 4): Use telnet <IP> <Port> or nc -zv <IP> <Port> to see if a specific port (like 80 or 443) is open.
+•	Step 4 (Local): Check ifconfig or ip a to ensure the network interface is up.
+2. Disk Full
+Interview Approach: Use the "Quick Check vs. Deep Dive" method.
+•	Step 1: Run df -h to identify which partition is at 100%.
+•	Step 2: Run du -sh /* | sort -h to find the specific directory consuming space.
+•	The "Hidden" Issue: Mention Inodes. If df -h shows space available but you can't save files, check df -i. If inodes are at 100% (caused by millions of tiny files), you can't create new files.
+•	The "Deleted File" Trap: If you delete a large log file but space isn't reclaimed, a process might still be holding it open. Use lsof | grep deleted to find and restart that process.
+________________________________________
+3. High CPU Usage
+Interview Approach: Identify the process and determine if it's "User," "System," or "I/O Wait."
+•	Tool: Run top or htop.
+•	Key Metrics: Look at the Load Average (1, 5, and 15-minute intervals). If load average > number of CPU cores, the system is bottlenecked.
+•	I/O Wait (wa): If CPU is high but processes are idle, it might be "I/O Wait"—the CPU is waiting for a slow hard drive.
+•	Action: renice the process to lower priority or kill -9 if it's a zombie/rogue process.
+4. Memory Leak
+Interview Approach: Explain that memory leaks cause gradual slowing and eventually trigger the OOM (Out of Memory) Killer.
+•	Step 1: Use free -m to check available RAM vs. Cache.
+•	Step 2: Check /var/log/messages or dmesg for "Out of Memory: Kill process" errors.
+•	Step 3: Use top and sort by memory (M).
+•	Correction: Mention that "Buffers/Cache" memory is actually healthy; "Available" memory is the number that matters.
+________________________________________
+5. Service Down
+Interview Approach: Demonstrate a systematic check of the service manager and logs.
+•	Check Status: systemctl status <service_name>.
+•	Check Logs: Use journalctl -u <service_name> -f to see real-time error messages.
+•	Check Config: Many services have a "test" flag (e.g., nginx -t) to check for syntax errors in configuration files before restarting.
+•	Check Port: Use netstat -tulpn | grep <port> to see if the service is actually listening.
+6. Permission Denied
+Interview Approach: It’s almost always Ownership, Mode, or Security Context.
+•	Ownership: Check ls -l. Does the user/group own the file? (chown to fix).
+•	Permissions: Does the file have the correct bits (e.g., 755 for scripts)? (chmod to fix).
+•	The "Advanced" Answer: Mention SELinux or AppArmor. If permissions look perfect (rwxrwxrwx) but you still get "Permission Denied," check the SELinux context with ls -Z or try setenforce 0 temporarily to see if it fixes the issue.
+________________________________________
+Summary Table for the Interviewer
+Problem	Primary Command	Secondary Check
+Connectivity	ping / traceroute	iptables -L (Firewall)
+Storage	df -h	df -i (Inodes)
+Performance	top / uptime	iostat (Disk I/O)
+Application	systemctl status	journalctl -xe
+
+
+

@@ -1,0 +1,98 @@
+CHAPTER 11 – Text Processing (VERY IMPORTANT) - story
+Once upon a time in the Kingdom of Data, there was a massive, sprawling Library of Logs. This library contained every record of every event that had ever happened in the kingdom, but it was a chaotic mess of parchment and ink.
+
+To manage this chaos, the King appointed a team of Seven Wizards of Text Processing. Each had a unique staff and a specific spell to bring order to the scrolls.
+
+1. Grep: The Scout
+The first wizard was Grep. He was a master tracker. If the King needed to find every mention of a "Golden Dragon" in a million-page scroll, Grep would close his eyes, whisper a pattern, and instantly point to every line containing those words. He didn't change the text; he just found it.
+
+His Spell: grep "pattern" file
+
+Specialty: Finding needles in haystacks.
+
+2. Awk: The Accountant
+Next was Awk. He was obsessed with columns and tables. While Grep looked at lines, Awk saw the world in fields. If a scroll listed "Name | Age | Gold," Awk could instantly calculate the total gold or print only the names of people over 50. He was the smartest of the bunch, often writing complex "mini-programs" on the fly.
+
+His Spell: awk '{print $1, $3}' file
+
+Specialty: Processing data organized in columns.
+
+3. Sed: The Editor
+Sed was a bit of a trickster. He was a "Stream Editor." As a scroll unrolled before him, he could transform it in real-time. If the King decided that "Silver" should now be called "Platinum," Sed would wave his wand as the paper moved past, and the ink would change before it even hit the floor.
+
+His Spell: sed 's/old/new/g' file
+
+Specialty: Find-and-replace transformations.
+
+4. Cut: The Surgeon
+Cut was a man of precision. He didn't care about logic or patterns; he cared about positions. If you gave him a list of long addresses and told him, "I only want the zip codes (characters 50 through 55)," he would snip them out with surgical accuracy, discarding the rest of the line.
+
+His Spell: cut -d',' -f2 file
+
+Specialty: Slicing out specific vertical sections of text.
+
+5. Sort: The Organizer
+The library floor was often covered in unsorted lists. Sort would come in and march the lines into alphabetical or numerical order. Whether it was a list of soldiers by height or a list of towns by name, he ensured everything followed a strict sequence.
+
+His Spell: sort -n file (for numbers)
+
+Specialty: Putting things in order.
+
+6. Uniq: The Eliminator
+Uniq was Sort’s best friend. He hated clutter. If a scroll had the same line written five times in a row, Uniq would snap his fingers, and four of them would vanish, leaving only one unique copy. He was a bit lazy, though—he could only spot duplicates if they were standing right next to each other (which is why he always asked Sort to work first).
+
+His Spell: uniq -c file (to count occurrences)
+
+Specialty: Removing or counting duplicate lines.
+
+7. Tr: The Translator
+Finally, there was Tr. He was a specialist in character-to-character combat. He didn't care about words; he cared about the letters themselves. If you wanted a scroll translated entirely into UPPERCASE, or if you wanted to turn every space into a newline, Tr was your wizard.
+
+His Spell: tr 'a-z' 'A-Z'
+
+Specialty: Swapping or deleting individual characters.
+
+The Great Pipeline
+The true magic happened when these wizards worked together in a Pipeline.
+
+The King once asked: "Find all unique visitors from the 'Castle' logs, sort them, and tell me how many times each visited."
+
+The wizards lined up:
+
+Grep found the lines with "Castle."
+
+Cut snipped out just the usernames.
+
+Sort put the names in order.
+
+Uniq counted the duplicates.
+
+And just like that, the Kingdom of Data was at peace.
+
+CHAPTER 11 – Text Processing (VERY IMPORTANT) - interview perspective
+In a technical interview, the interviewer isn't just looking for definitions; they want to know when to use which tool and how you combine them using pipes (|).Here is the breakdown of these concepts from a professional interview perspective.
+
+1. grep (Global Regular Expression Print)Interview Pitch: "The primary tool for searching and filtering text based on patterns."Key Distinction: Use it when you need to find specific lines in a file or output.
+Must-know Flags:
+-i: Case-insensitive search.
+-v: Invert match (show lines that don't match).
+-r: Recursive search through directories.
+-E: Extended regex (for complex patterns like "this OR that").
+
+2. awk (The Pattern Scanning Language)Interview Pitch: "A powerful data extraction and reporting tool that treats lines as records and words as fields."Key Distinction: Use it for column-based data or when you need to perform logic/math on text.Key Concept: $0 represents the whole line, while $1, $2, etc., represent specific columns.Example: 
+awk -F':' '{print $1}' /etc/passwd (Extracting usernames by setting the delimiter to a colon).
+
+3. sed (Stream Editor)Interview Pitch: "A non-interactive editor used for transforming or filtering text in a stream."Key Distinction: Use it for find-and-replace operations or deleting specific line numbers.The Command Structure: 
+sed 's/old_text/new_text/g' (where s is substitute and g is global).Pro Tip: Mention the -i flag, which allows you to edit the file "in-place" rather than just printing to the screen.
+
+4. cut (Vertical Slicing)Interview Pitch: "A lightweight utility for extracting specific sections (columns) from each line of a file."Key Distinction: Use it when you have a simple delimiter (like a comma or tab) and just need to "snip" a column.Comparison: If you just need a column, cut is faster and simpler than awk.Flags: -d (delimiter) and -f (field number).
+
+5. sort (Data Ordering)Interview Pitch: "Used to arrange lines of text in a specific order."Key Distinction: Essential before using uniq.Common Flags:-n: Numeric sort (otherwise "10" comes before "2").
+-r: Reverse the order.
+-k: Sort based on a specific column/key.
+
+6. uniq (De-duplication)Interview Pitch: "Reports or filters out repeated lines in a file."The Golden Rule: Input must be sorted. uniq only compares adjacent lines.High-Value 
+Flag: -c (count). It tells you how many times each line appeared, which is a classic interview question for log analysis.
+
+7. tr (Translate/Transform)Interview Pitch: "A character-level transformation tool."Key Distinction: It doesn't handle patterns or words, only individual characters.Use Cases:Converting lowercase to uppercase: tr 'a-z' 'A-Z'.
+Deleting characters: tr -d ' ' (removes all spaces).Squeezing repeats: tr -s ' ' (turns multiple spaces into one).Common Interview "One-Liner" ScenariosProblemThe Solution ChainFind the top 5 most frequent IP addresses in a log.cat access.log | awk '{print $1}' | sort | uniq -c | sort -nr | head -5Find a string, replace it, and save the file.sed -i 's/localhost/127.0.0.1/g' config.txtExtract the 3rd column of a CSV file.cut -d',' -f3 file.csv

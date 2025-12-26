@@ -1,0 +1,94 @@
+Linux Permissions & Ownership -3-story
+
+In the Digital Kingdom of Terminalia, the King has realized that not every citizen should have access to the Royal Treasury or the Secret Maps. To keep order, he establishes the Laws of Permissions and Ownership.
+________________________________________
+1. The Social Order: Users and Groups
+In Terminalia, every citizen has an Identity (id).
+•	Users: Every person has a unique name (Account).
+•	Groups: Citizens belong to guilds (e.g., the "Blacksmiths" or "Accountants").
+•	The Root: The King (Root User) has the "Master Key" and can enter any room or read any scroll.
+________________________________________
+2. The Secret Code: File Permissions (rwx)
+Every scroll in the library has a magical tag attached to it. When you use the command ls -l, you reveal these hidden tags.
+The tag has three types of permissions:
+1.	r (Read): Can you look at the scroll?
+2.	w (Write): Can you edit or erase the scroll?
+3.	x (Execute): Can you run the scroll (like a set of instructions)?
+These are assigned to three parties: Owner (The creator), Group (The guild), and Others (The public).
+________________________________________
+3. The Math of the Realm: Numeric Permissions
+The royal scholars realized writing rwx took too long, so they assigned numbers to the powers:
+•	Read (r) = 4
+•	Write (w) = 2
+•	Execute (x) = 1
+If you add them up, you get a single digit. For example, 7 ($4+2+1$) means full power.
+•	755: The Owner can do everything (7), but the Group and Others can only Read and Execute (5).
+•	644: The Owner can Read/Write (6), while everyone else can only Read (4).
+________________________________________
+4. The Magic Wands: chmod and chown
+To change the laws of a scroll, you use specific spells:
+•	chmod (Change Mode): This changes the permissions. "chmod 700 secret_plans.txt" ensures only the owner can see the plans.
+•	chown (Change Owner): This changes the ownership. If a Blacksmith retires, he might use "chown new_smith tools.txt" to hand over his records to his successor.
+________________________________________
+5. The Royal Decree: umask
+When a new scroll is born, what should its default permissions be? This is decided by the umask. It acts like a filter that "subtracts" permissions from a new file to ensure it isn't too public by default. If the kingdom's umask is high, all new scrolls are born locked in private chests.
+________________________________________
+6. The Ancient Enchantments: SUID, SGID, and Sticky Bit
+Sometimes, the standard laws aren't enough. The King uses "Special Spells":
+•	SUID (Set User ID): A scroll that, when read by a peasant, temporarily gives them the power of the King to complete a specific task.
+•	SGID (Set Group ID): Ensures that any new scroll placed in a specific room automatically belongs to that room's guild.
+•	Sticky Bit: Imagine a shared table in the tavern. Anyone can put a scroll there, but only the person who put it there can take it away or burn it. This prevents citizens from deleting each other's work in shared spaces.
+
+Linux Permissions & Ownership - intervew perspective
+
+In a technical interview, discussions about permissions are often used to gauge your understanding of system security and multi-user environments. Interviewers look for your ability to troubleshoot "Permission Denied" errors and your knowledge of administrative best practices.
+________________________________________
+1. Users and Groups
+In Linux, everything is based on identity.
+•	Users: Every process and file is owned by a specific account.
+•	Groups: A collection of users. Permissions are often managed at the group level to avoid assigning them individually to 100 different people.
+•	Interview Tip: If asked how to check your current identity, mention the id command. It shows your UID (User ID), GID (Group ID), and the groups you belong to.
+________________________________________
+2. File Permissions (rwx)
+When you run ls -l, you see a string like -rwxr-xr--. Interviewers expect you to decode this instantly.
+•	The Triplets: The string is divided into three sets: User (Owner), Group, and Others.
+•	r (Read): Permission to view file contents or list directory contents.
+•	w (Write): Permission to modify the file or add/remove files in a directory.
+•	x (Execute): Permission to run a file as a program or cd into a directory.
+________________________________________
+3. Numeric (Octal) Permissions
+Interviewers often use numbers instead of letters. You must know the binary weights:
+•	4 = Read
+•	2 = Write
+•	1 = Execute
+•	0 = No permission
+Common Interview Examples:
+•	755: Owner has full access ($4+2+1=7$); Group/Others can read and execute ($4+1=5$). Standard for executable scripts.
+•	644: Owner can read/write ($4+2=6$); others can only read ($4$). Standard for text files.
+•	700: Only the owner has access.
+________________________________________
+4. Administrative Commands: chmod & chown
+•	chmod (Change Mode): Used to change permissions.
+o	Symbolic: chmod u+x script.sh (Give user execute rights).
+o	Numeric: chmod 777 file (Give everyone full rights—Warning: Mention in the interview that 777 is usually a security risk).
+•	chown (Change Owner): Used to change which user or group owns a file.
+o	Format: chown user:group filename.
+o	Note: Only the root user (superuser) can generally change the owner of a file.
+________________________________________
+5. umask (The Default Filter)
+An interviewer might ask: "Why does a new file have 644 permissions by default?"
+•	umask is the "User Mask." It defines what permissions are subtracted from the system default (usually 666 for files and 777 for directories) when a new file is created.
+•	If umask is 022, a new directory ($777 - 022$) becomes 755.
+________________________________________
+6. Special Permissions (The Advanced Bits)
+This distinguishes a junior candidate from a senior one.
+Permission	Effect	Use Case
+SUID (Set UID)	File runs with the privileges of the owner.	The passwd command (so users can change their own password).
+SGID (Set GID)	New files in a directory inherit the folder's group.	Collaborative folders for a specific team.
+Sticky Bit	Only the file owner can delete their file.	The /tmp directory (prevents users from deleting each other's files).
+________________________________________
+Critical Interview Question:
+Q: "I have read permissions on a file, but I can't delete it. Why?"
+A: Because deletion is controlled by the Write (w) permission of the Parent Directory, not the file itself. To delete a file, you need write access to the folder it lives in.
+
+

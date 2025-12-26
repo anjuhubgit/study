@@ -1,0 +1,124 @@
+shellbscripting basics - 10
+Once upon a time in the digital realm of Kernel-Land, there lived a powerful sorcerer named Bash. While the King (the Kernel) handled the heavy lifting of the land, he didn't speak the common tongue of the citizens. Bash was the "Shell"—the interpreter who took the people’s spoken words and turned them into royal decrees.
+
+Here is the tale of how Bash taught the citizens to automate their lives.
+
+1. Bash Basics: The Script of Life
+In Kernel-Land, if you wanted to do a task, you had to shout commands one by one. But Bash told the citizens, "Write your commands on a scroll (a .sh file), and I shall read it for you."
+
+Every scroll had to start with a magical header called the Shebang: #!/bin/bash. This told the kingdom, "This scroll is written in the language of Bash!" To make the scroll work, the citizen had to grant it "Life Energy" using the command chmod +x script.sh.
+
+2. Variables: The Magic Boxes
+Bash gave the citizens magical boxes called Variables. Instead of remembering long, complicated names, they could store them in a box.
+
+The Rule: When you put something in the box, you use the name: CITY="Kernel-Land".
+
+The Retrieval: When you want to get it back out, you must use the "Key of Recognition" ($): echo $CITY.
+
+3. Conditions: The Fork in the Road
+As the citizens wrote more complex scrolls, they reached points where they had to make choices. These were called Conditions.
+
+Bash would look at a situation and ask, "Is this true?"
+
+If a citizen’s gold was greater than 100 (if [ $GOLD -gt 100 ]), they took the path to the Luxury District.
+
+If not (else), they took the path to the Common Market.
+
+Every choice ended with fi (which is just "if" spelled backward), signaling the end of that specific decision.
+
+4. Loops: The Infinite Treadmill
+Sometimes, a citizen had to do the same task 100 times, like cleaning 100 stable stalls. Instead of writing the command 100 times, Bash taught them the Loop.
+
+The "For" Loop: "For every stall from 1 to 100, do this task."
+
+The "While" Loop: "While the sun is still up, keep working."
+
+Once the task was finished, they would say done, and the treadmill would stop.
+
+5. Functions: The Magic Spells
+The citizens realized they were repeating the same "Choice" and "Loop" logic in many different scrolls. To save time, they created Functions—pre-packaged spells.
+
+A citizen could define a spell called Check_Security(). Inside were ten different commands. Now, instead of writing those ten lines every time, they simply whispered the name Check_Security, and Bash performed the whole ritual instantly.
+
+6. Exit Codes: The Final Report
+Whenever a scroll finished running, Bash would turn to the King and give a silent signal. This was the Exit Code.
+
+0 (The Hero's Success): "All is well; the task was completed perfectly."
+
+1 to 255 (The Cry for Help): "Something went wrong!"
+
+Different numbers told different stories—1 was a general error, while 127 meant "I couldn't even find the command you asked for!" To see the last report, a citizen would ask the secret question: echo $?.
+
+shellscripting basics-10- wrt to interview
+In a Linux engineering interview, the interviewer wants to see if you can automate repetitive tasks and handle errors gracefully. They aren't just looking for syntax; they want to know if you can write "production-grade" scripts.
+
+1. Bash Basics
+Interview Perspective: The interviewer may ask about the "Shebang" or how to execute a script.
+
+The Shebang (#!/bin/bash): Explain that this is the interpreter directive. It tells the kernel which shell to use to parse the script. Without it, the script might run in sh (Bourne shell), which lacks many modern Bash features.
+
+Permissions: You must mention chmod +x script.sh. An admin who writes a script but forgets to make it executable hasn't finished the job.
+
+Execution: Know the difference between ./script.sh (runs in a sub-shell) and source script.sh (runs in the current shell environment).
+
+2. Variables
+Interview Perspective: They might ask about the difference between local variables, environment variables, and special variables.
+
+Syntax: No spaces around the = sign (e.g., NAME="Gemini").
+
+Referencing: Always mention quoting variables ("$NAME"). Explain that quoting prevents "word splitting" if the variable contains spaces, which is a common source of bugs.
+
+Special Variables: Be ready to define these:
+
+$0: Name of the script.
+
+$1, $2: Positional arguments (parameters passed to the script).
+
+$#: The number of arguments passed.
+
+3. Conditions (If/Else)
+Interview Perspective: You might be asked how to check if a file exists or if a string is empty.
+
+The Test Command: Explain that [ is actually a command (alias for test).
+
+Flag Knowledge: Memorize these common flags:
+
+-f: True if the file exists and is a regular file.
+
+-d: True if the directory exists.
+
+-z: True if the string length is zero (empty).
+
+Numeric vs. String: Mention that for numbers, we use -eq, -ne, -gt, but for strings, we use == or !=.
+
+4. Loops
+Interview Perspective: Use loops to demonstrate "Scale." How would you rename 1,000 files at once?
+
+For Loops: Best when you have a pre-defined list (e.g., for user in $(cat users.txt); do ...).
+
+While Loops: Best for reading files line-by-line or waiting for a condition to change (e.g., waiting for a server to come online).
+
+Efficiency: Mention that loops are powerful, but sometimes tools like xargs or awk are faster for massive data sets.
+
+5. Functions
+Interview Perspective: This is where you prove you write clean, reusable code.
+
+DRY Principle: "Don't Repeat Yourself." Explain that functions allow you to group logic (like logging or error handling) so you don't have to rewrite it ten times in one script.
+
+Local Variables: Mention the local keyword inside functions. This prevents a function from accidentally overwriting a global variable, which is a "senior-level" coding practice.
+
+6. Exit Codes
+Interview Perspective: This is arguably the most important topic. Interviewers love to ask: "How do you know if your script succeeded?"
+
+The $? Variable: This holds the exit status of the last executed command.
+
+Standard Codes:
+
+0: Success.
+
+Non-zero (1-255): Failure.
+
+Best Practice: Tell the interviewer you use set -e at the top of scripts. This makes the script exit immediately if any command fails, preventing a "domino effect" of errors.
+
+A Classic Interview Scenario:
+Interviewer: "Your script needs to backup a folder, but only if the destination disk has enough space. How do you handle this?"

@@ -1,0 +1,75 @@
+CHAPTER 13 – Linux Security Basics - story
+In the Kingdom of Data, the castle walls were strong, but the King knew that enemies were always looking for a way inside. To protect the kingdom’s secrets, he appointed a Grand Warden of Security to implement five layers of defense.
+________________________________________
+1. SSH Basics: The Magic Tunnel
+In the old days, messengers traveled openly, and spies could read their letters. The Warden introduced SSH (Secure Shell). When a messenger needs to talk to the castle from a far-off land, SSH creates an invisible, unbreakable magic tunnel between them. Even if a spy stands right next to the messenger, they see only scrambled nonsense.
+•	The Spell: ssh user@castle-ip
+•	The Mule (scp): If a messenger needs to send a physical chest (file) through that tunnel, they use SCP (Secure Copy).
+2. SSH Keys: The Enchanted Medallion
+The Warden realized that passwords could be guessed or stolen. So, he introduced SSH Keys. Instead of a password, a traveler carries a Private Key (a secret medallion). The castle gate has a Public Key (the lock that only that medallion fits).
+•	Creating the Medallion: The traveler uses ssh-keygen to forge their pair of keys.
+•	Why it's better: No one can "guess" a medallion. If you don't have the physical key, you aren't getting in.
+________________________________________
+3. Disable Root Login: The Decoy Throne
+The King (the root user) is the most powerful person in the kingdom. The Warden noticed that every assassin tries to attack the King directly. To solve this, he ordered that the main castle gate be locked for the King.
+•	The Strategy: Even the King must enter through a side door as a "Normal Citizen" (a standard user) and then change into his royal robes (using sudo) once inside. This way, assassins don't even know which "citizen" is actually the King.
+________________________________________
+4. Firewall Basics: The City Gates
+The Firewall is the castle’s outer wall. It has many small windows called Ports. By default, the Warden keeps all windows closed.
+•	The Guards: * UFW (Uncomplicated Firewall): The friendly guard who follows simple orders like "Open the door for Web Traffic."
+o	Firewall-cmd: The more disciplined, high-ranking guard used in the Northern Provinces (Red Hat/CentOS) who manages complex "zones."
+•	The Rule: If a port isn't explicitly opened, the wall is solid stone.
+________________________________________
+5. SELinux Basics: The Internal Security Detail
+Even if someone gets inside the castle, the Warden doesn't trust them. SELinux (Security-Enhanced Linux) is like having a guard in every single room.
+•	The Concept: In a normal kingdom, if a cook gets into the kitchen, they might try to sneak into the armory. SELinux says: "You are a cook. You have permission to be in the kitchen, but even if the door to the armory is open, you are not allowed to touch a sword."
+•	The Result: It limits the damage a person (or a hacked program) can do, even if they have already bypassed the gate.
+________________________________________
+The Commands of the Warden
+•	ssh-keygen: Forging your secret medallions (keys).
+•	ssh: Stepping into the magic tunnel to reach a remote server.
+•	scp: Sliding a file through that magic tunnel.
+•	ufw / firewall-cmd: Telling the gatekeepers which windows to open or shut.
+
+CHAPTER 13 – Linux Security Basics - interview
+In a Linux or DevOps interview, security is often the "make or break" section. Interviewers look for candidates who prioritize the Principle of Least Privilege and understand how to harden a server against unauthorized access.
+________________________________________
+1. SSH Basics (Secure Shell)
+Interview Pitch: "SSH is the industry-standard protocol for secure remote administration. It replaces older, insecure protocols like Telnet by encrypting the entire communication session."
+•	Key Concept: It operates on Port 22 by default.
+•	The Tools: * ssh: To log in to a remote machine.
+o	scp: (Secure Copy) for transferring files between hosts over the SSH protocol.
+•	Pro Tip: Mention that changing the default port (e.g., to 2222) is a basic "security by obscurity" tactic to reduce automated bot attacks.
+2. SSH Keys (Asymmetric Authentication)
+Interview Pitch: "SSH keys provide a more secure alternative to password-based logins. They use a pair of cryptographic keys: a Public Key (placed on the server) and a Private Key (kept by the user)."
+•	The Workflow: 1. Generate keys using ssh-keygen.
+2. Copy the public key to the server's ~/.ssh/authorized_keys file.
+•	Why it's asked: It prevents brute-force password attacks. If an interviewer asks how to make a server "un-hackable" via password, key-based authentication is the answer.
+________________________________________
+3. Disable Root Login
+Interview Pitch: "Disabling direct root login via SSH is a critical hardening step. It forces users to log in as a standard user and use sudo for administrative tasks."
+•	The "Why": This creates an audit trail (you know who became root) and prevents attackers from targeting the most powerful account directly.
+•	How to do it: Edit /etc/ssh/sshd_config and set PermitRootLogin no, then restart the sshd service.
+________________________________________
+4. Firewall Basics (UFW & Firewall-cmd)
+Interview Pitch: "A firewall is the first line of defense, acting as a gatekeeper that allows or blocks traffic based on predefined rules (ports, protocols, and IP addresses)."
+•	UFW (Uncomplicated Firewall): Common in Debian/Ubuntu. It’s designed for simplicity (e.g., ufw allow 80).
+•	Firewall-cmd (Firewalld): Common in RHEL/CentOS/Fedora. It uses "Zones" to manage trust levels for different network connections.
+•	Crucial Answer: Always mention the "Default Deny" policy—blocking everything by default and only opening what is strictly necessary.
+________________________________________
+5. SELinux Basics (Security-Enhanced Linux)
+Interview Pitch: "SELinux is a Mandatory Access Control (MAC) mechanism that provides an extra layer of security by defining how processes interact with files and each other."
+•	Key Concept: Unlike standard permissions (where a user can do anything with their own files), SELinux looks at Labels/Contexts. Even if a hacker gains "root" access to a web server, SELinux can prevent that process from touching sensitive system files.
+•	States: * Enforcing: Security policy is enforced.
+o	Permissive: Violations are logged but not blocked (used for troubleshooting).
+o	Disabled: Security policy is ignored.
+________________________________________
+Critical Interview Commands Summary
+Command	Purpose
+ssh-keygen	Generates a new Public/Private key pair (usually RSA or ED25519).
+ssh -i [key]	Specifies a particular private key to use for a connection.
+scp [file] [user]@[host]:[path]	Securely copies a file to a remote server.
+ufw status / firewall-cmd --list-all	
+
+
+

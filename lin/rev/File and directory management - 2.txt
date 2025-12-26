@@ -1,0 +1,68 @@
+File and directory management - 2 - story
+Welcome to the Digital Kingdom of Terminalia, where the Great Archivist (that’s you!) manages the vast library of the realm. To keep the kingdom organized, you must master the ancient scrolls and the magic words used to handle them.
+________________________________________
+The Birth of a Record: Creating Files and Directories
+In the beginning, Terminalia was a blank void. To build your library, you need shelves and scrolls.
+•	mkdir (Make Directory): You wave your hand and shout "mkdir Chronicles!" Instantly, a new room (folder) appears to store your stories.
+•	touch: You need a fresh, blank scroll. By whispering "touch chapter1.txt", a new, empty file appears in your hand.
+•	rmdir (Remove Directory): If you build a room by mistake and it's completely empty, "rmdir OldRoom" collapses it back into the void.
+________________________________________
+The Logistics: Copy, Move, and Delete
+As the library grows, you’ll realize that some scrolls belong elsewhere, and some are just old junk.
+•	cp (Copy): You find a beautiful poem. You want to keep one in the "Chronicles" room and give one to the King. You use "cp poem.txt King_Library/" to duplicate it.
+•	mv (Move/Rename): You realize "chapter1.txt" is actually the "Introduction." You use "mv chapter1.txt intro.txt" to rename it. Or, you use mv to physically carry a scroll from one room to another.
+•	rm (Remove): Beware! This is a permanent incinerator. When you say "rm scrap.txt", the scroll vanishes into ash. There is no "Trash Can" in Terminalia.
+________________________________________
+Peeking Inside: Viewing File Content
+Sometimes you don't want to change a scroll; you just want to read it. Depending on the size of the scroll, you have different tools:
+•	cat (Concatenate): For short scrolls, you use cat. It unrolls the entire thing instantly on your screen. Great for a quick glance!
+•	less / more: For massive scrolls that go on for miles, you use less. It lets you read the scroll page by page, so you don't get overwhelmed.
+•	head / tail: Sometimes you only need the "Once upon a time" (the first 10 lines with head) or the "Happily ever after" (the last 10 lines with tail).
+•	wc (Word Count): To see how much work you’ve done, you use wc. It counts the lines, words, and characters so you can report your progress to the King.
+________________________________________
+The Magic of Wildcards: Selecting the Many
+The Archivist often has to deal with hundreds of scrolls at once. Instead of naming them all, you use the Magic Star (*).
+•	The Wildcard (*): If you want to move every single text file to the archives, you don't type every name. You simply say *"mv .txt Archives/". The * acts as a placeholder for "anything," allowing you to grab every file that ends in .txt with one single command.
+
+
+File and directory management - 2 - interview perspective
+
+In a technical interview, the interviewer isn't just checking if you know the commands; they are testing if you understand file system safety, efficiency, and data manipulation. Here is how to explain these concepts like a seasoned systems administrator.
+________________________________________
+1. Creating Files and Directories
+In an interview, mention that these are the "building blocks" of environment setup.
+•	mkdir (Make Directory): Used to create folders.
+o	Pro Tip: Mention the -p flag (parents). It allows you to create a nested path like mkdir -p project/src/bin in one shot, even if the parent folders don't exist yet.
+•	rmdir: Only removes empty directories. Interviewers like to see if you know that rmdir is safer than rm -r for deleting folders because it prevents accidental loss of data.
+•	touch: While primarily used to create empty files, its "true" purpose is to update the timestamp (mtime/atime) of an existing file without changing its content.
+________________________________________
+2. Copy, Move, and Delete Files
+This section is about managing data lifecycle.
+•	cp (Copy): Copies data. For directories, you must use the recursive flag (-r).
+•	mv (Move): This command serves two purposes: moving a file to a new location or renaming it. In Linux, renaming a file is technically just moving it to the same spot with a different name.
+•	rm (Remove): This is permanent.
+o	Interview Insight: Mention the -i (interactive) flag. It’s a best practice to use rm -i so the system asks for confirmation before deleting, preventing catastrophic mistakes.
+________________________________________
+3. Viewing File Content
+The interviewer may ask: "How would you check a 10GB log file?" Your choice of command matters.
+•	cat (Concatenate): Dumps the entire file to the terminal. Never use this for large files as it will flood your buffer.
+•	more / less: These are "pagers." less is superior because it doesn't load the whole file into memory at once and allows you to scroll backward and forward.
+•	head / tail: Used to see the start or end of a file.
+o	Critical Interview Point: Mention tail -f. This "follows" the file in real-time. It is the standard way to monitor live application logs as they are written.
+•	wc (Word Count): Often used with the -l flag to count how many lines are in a file (e.g., counting the number of errors in a log).
+________________________________________
+4. File Wildcards (Globbing)
+Wildcards are about pattern matching to perform bulk operations.
+•	* (Asterisk): Matches any number of characters. rm *.log deletes all files ending in .log.
+•	? (Question Mark): Matches exactly one character. file?.txt matches file1.txt but not file10.txt.
+Interview Scenario: "How do you move all images to a backup folder?"
+Answer: Use mv *.jpg *.png backup/. This demonstrates your ability to use wildcards to handle multiple files efficiently.
+________________________________________
+Summary Table for Quick Recall
+Command	Primary Use	Interview "Gotcha"
+mkdir -p	Create nested folders	Handles missing parent directories.
+touch	Create file / Update time	Useful for triggering build scripts.
+cp -r	Copy folders	You must use -r for directories.
+tail -f	Monitor logs	Essential for real-time debugging.
+rm -rf	Force delete	Powerful but dangerous; use with extreme caution.
+
