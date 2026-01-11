@@ -1,0 +1,300 @@
+================================================================
+CHAPTER 1 – AWS FUNDAMENTALS
+================================================================
+1. What is Cloud Computing?
+2. What is AWS?
+3. AWS global infrastructure
+   - Regions
+   - Availability Zones
+   - Edge Locations
+4. AWS Shared Responsibility Model
+5. AWS Management Console overview
+6. AWS Pricing basics
+
+Outcome:
+- Understand AWS global design
+- Clear interview explanation of regions & AZs
+
+
+================================================================
+CHAPTER 2 – AWS IDENTITY & ACCESS MANAGEMENT (IAM) (VERY IMPORTANT)
+================================================================
+1. IAM users, groups, roles
+2. IAM policies (JSON)
+3. Managed vs inline policies
+4. Least privilege principle
+5. STS & temporary credentials
+6. IAM role for services (EC2, Lambda, EKS)
+
+Practice:
+- Create IAM users
+- Attach policies
+- Use IAM role instead of access keys
+
+
+================================================================
+CHAPTER 3 – AWS ACCOUNT & RESOURCE MANAGEMENT
+================================================================
+1. AWS account structure
+2. Resource tagging strategy
+3. AWS Organizations
+4. SCP (Service Control Policies)
+5. Multi-account strategy
+
+Practice:
+- Create tags
+- Understand account-level guardrails
+
+
+================================================================
+CHAPTER 4 – AWS NETWORKING (INTERVIEW GOLD)
+================================================================
+1. VPC
+2. CIDR blocks
+3. Subnets (public & private)
+4. Internet Gateway
+5. NAT Gateway
+6. Route Tables
+7. Security Groups
+8. Network ACLs
+9. VPC Endpoints
+10. DNS basics (Route 53)
+
+Practice:
+- Create VPC
+- Launch EC2 in public & private subnet
+- Configure routing
+
+
+================================================================
+CHAPTER 5 – AWS COMPUTE SERVICES
+================================================================
+1. EC2 basics
+2. EC2 instance types
+3. AMI
+4. Key pairs
+5. Auto Scaling Groups
+6. Elastic Load Balancer (ALB/NLB)
+7. Bastion host concept
+
+Practice:
+- Launch EC2
+- SSH into instance
+- Attach security groups
+- Scale instances
+
+
+================================================================
+CHAPTER 6 – AWS STORAGE SERVICES
+================================================================
+1. Amazon S3
+2. Buckets & objects
+3. Storage classes
+4. Lifecycle rules
+5. Bucket policies
+6. EBS
+7. EFS
+
+Practice:
+- Upload/download objects
+- Setup lifecycle rules
+- Attach EBS volume
+
+
+================================================================
+CHAPTER 7 – AWS DATABASE SERVICES
+================================================================
+1. Amazon RDS
+2. Multi-AZ vs Read Replicas
+3. Amazon DynamoDB
+4. Amazon Aurora (conceptual)
+5. Backup & restore strategies
+
+Practice:
+- Create RDS
+- Connect from EC2
+- Understand HA setup
+
+
+================================================================
+CHAPTER 8 – AWS LOAD BALANCING & DNS
+================================================================
+1. Application Load Balancer
+2. Network Load Balancer
+3. Health checks
+4. Target groups
+5. Route 53 routing policies
+
+Practice:
+- Setup ALB
+- Attach EC2 targets
+- Configure DNS routing
+
+
+================================================================
+CHAPTER 9 – AWS MONITORING & LOGGING
+================================================================
+1. Amazon CloudWatch
+2. Metrics & logs
+3. Alarms
+4. Dashboards
+5. CloudTrail basics
+6. AWS Config overview
+
+Practice:
+- Create alarms
+- Monitor EC2 metrics
+- View audit logs
+
+
+================================================================
+CHAPTER 10 – AWS SECURITY (DEVSECOPS CORE)
+================================================================
+1. IAM security best practices
+2. AWS KMS
+3. Secrets Manager
+4. Parameter Store
+5. Security Hub
+6. GuardDuty
+7. Inspector
+
+Practice:
+- Store secrets securely
+- Enable GuardDuty
+- Review security findings
+
+
+================================================================
+CHAPTER 11 – AWS SERVERLESS
+================================================================
+1. AWS Lambda
+2. API Gateway
+3. EventBridge
+4. SQS
+5. SNS
+6. DynamoDB Streams (concept)
+
+Practice:
+- Create Lambda
+- Trigger via API
+- Event-driven execution
+
+
+================================================================
+CHAPTER 12 – CONTAINERS & KUBERNETES
+================================================================
+1. Docker on AWS
+2. Amazon ECR
+3. Amazon ECS
+4. ECS launch types
+5. Amazon EKS
+6. EKS architecture basics
+
+Practice:
+- Push image to ECR
+- Deploy container
+- Expose service
+
+
+================================================================
+CHAPTER 13 – INFRASTRUCTURE AS CODE (TERRAFORM / CLOUDFORMATION)
+================================================================
+1. IaC concepts
+2. Terraform with AWS
+3. Providers, state & backend
+4. Modules & variables
+5. CloudFormation overview
+
+Practice:
+- Deploy VPC & EC2 using Terraform
+- Manage state safely
+
+
+================================================================
+CHAPTER 14 – CI/CD ON AWS
+================================================================
+1. CI/CD basics recap
+2. AWS CodeCommit
+3. AWS CodeBuild
+4. AWS CodeDeploy
+5. AWS CodePipeline
+6. CI/CD with GitHub Actions
+
+Practice:
+- Build pipeline
+- Deploy app to EC2 / ECS
+
+
+================================================================
+CHAPTER 15 – COST MANAGEMENT & OPTIMIZATION
+================================================================
+1. AWS pricing model
+2. Cost Explorer
+3. Budgets & alerts
+4. Reserved Instances
+5. Spot Instances
+6. Rightsizing resources
+
+Practice:
+- Create budget alerts
+- Identify cost leaks
+
+
+================================================================
+CHAPTER 16 – BACKUP, DR & HIGH AVAILABILITY
+================================================================
+1. Backup strategies
+2. Multi-AZ vs Multi-region
+3. Snapshots
+4. Disaster Recovery patterns
+   - Backup & Restore
+   - Pilot Light
+   - Warm Standby
+   - Active-Active
+
+Practice:
+- Take snapshots
+- Test restore
+
+
+================================================================
+CHAPTER 17 – TROUBLESHOOTING SCENARIOS
+================================================================
+1. EC2 not reachable
+2. Disk full issue
+3. App running but not accessible
+4. IAM permission denied
+5. Load balancer health check failing
+6. Cost spike issue
+7. Terraform apply failed
+
+Practice:
+- Root cause analysis
+- Production-style debugging
+
+
+================================================================
+REAL-WORLD AWS SCENARIOS
+================================================================
+1. Lost PEM key for EC2
+2. Users can’t access application
+3. Sudden cost increase
+4. IAM user compromised
+5. EKS pod crashloop
+6. Public S3 exposed accidentally
+7. VPC networking misconfiguration
+8. Terraform drift detected
+================================================================
+napshots
+4. Disaster Recovery patterns
+   - Backup & Restore
+   - Pilot Light
+   - Warm Standby
+   - Active-Active
+
+Practice:
+- Take snapshots
+- Test restore
+
+
+=============================================================

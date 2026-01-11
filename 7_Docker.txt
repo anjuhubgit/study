@@ -1,0 +1,203 @@
+-----------
+
+====================================================
+SECTION 1 — DOCKER BASICS
+====================================================
+
+1. What is Docker? Explain containerization vs virtualization.
+2. Difference between Docker and Virtual Machines.
+3. What is a Docker Image? What is a Docker Container?
+4. Explain Docker Architecture: Client → Daemon → Registry → Objects.
+5. What is Docker Engine?
+6. What is a Docker Registry? Examples: Docker Hub, ECR, ACR, GCR.
+7. Explain Union File System (AUFS, OverlayFS).
+8. What is Copy-on-Write in Docker?
+9. Why is Docker lightweight?
+10. What happens internally when you run docker run?
+
+====================================================
+SECTION 2 — DOCKER IMAGES
+====================================================
+
+1. What is a base image vs parent image?
+2. What is a Dockerfile?
+3. Explain each major Dockerfile instruction:
+   - FROM
+   - RUN
+   - CMD
+   - ENTRYPOINT
+   - EXPOSE
+   - ENV
+   - WORKDIR
+   - ADD
+   - COPY
+   - VOLUME
+   - USER
+   - LABEL
+4. Difference between CMD vs ENTRYPOINT.
+5. Difference between ADD vs COPY.
+6. Multi-stage builds and why they are used.
+7. How to reduce Docker image size?
+8. What is image layering?
+9. Explain: docker image prune, docker image ls, docker image inspect.
+10. What are tagged images? Why needed?
+
+SOLVE THESE SCENARIOS:
+1. Image size is too large ??
+2. Image build slows pipeline ??
+3. Python app failing due to missing dependencies ??
+
+====================================================
+SECTION 3 — DOCKER CONTAINERS
+====================================================
+
+1. What is a container lifecycle?
+2. Difference between docker stop and docker kill.
+3. Key commands:
+   - docker ps
+   - docker run
+   - docker exec
+   - docker logs
+   - docker rm
+   - docker start
+   - docker inspect
+4. Detached vs interactive mode.
+5. Ports: host port vs container port.
+6. Container restart policies: always, on-failure, unless-stopped.
+7. What is shell access inside a container (docker exec -it)?
+8. Copy files between host and container (docker cp).
+
+SCENARIOS:
+1. Container restarts again and again ??
+2. Container running but app not reachable ??
+3. Container logs not showing — ??
+
+====================================================
+SECTION 4 — DOCKER VOLUMES & STORAGE
+====================================================
+
+1. What is a Docker Volume?
+2. Types:
+   - Named Volumes
+   - Bind Mounts
+   - Tmpfs mounts
+3. Difference between bind mounts and volumes.
+4. Where volumes are stored on Linux hosts?
+5. What is a storage driver?
+6. Backup & restore volumes (tar, rsync, docker run --rm -v).
+7. Commands:
+   - docker volume create
+   - docker volume ls
+   - docker volume inspect
+   - docker volume rm
+
+SCENARIOS:
+1. Database container losing data after restart ??
+2. Two containers need shared data ??
+3. Application needs read-only config ??
+
+====================================================
+SECTION 5 — NETWORKING IN DOCKER
+====================================================
+
+1. Docker networking basics.
+2. Bridge network (default).
+3. Host network.
+4. None network.
+5. Overlay network (Swarm, multi-host).
+6. Add container to a network (docker network connect).
+7. Commands:
+   - docker network ls
+   - docker network create
+   - docker network inspect
+   - docker network prune
+8. DNS inside Docker (embedded DNS server for user-defined networks).
+9. How containers communicate inside same bridge network.
+
+SCENARIOS:
+1. Containers cannot talk ??
+2. Application runs locally but not via Docker ??
+3. Two containers on different networks need to communicate ??
+
+====================================================
+SECTION 6 — DOCKER COMPOSE
+====================================================
+
+1. What is Docker Compose?
+2. Why is Compose needed?
+3. Compose file syntax (v2 & v3).
+4. Explain services, volumes, networks in compose.
+5. Compose commands:
+   - docker-compose up
+   - docker-compose down
+   - docker-compose logs
+   - docker-compose ps
+   - docker-compose exec
+   - docker-compose config
+   - docker-compose restart
+6. Environment variables in Compose (env_file, ${VAR}).
+7. Healthcheck in Compose.
+8. Scaling services (docker-compose up --scale).
+
+SCENARIOS:
+1. Multi-container app startup order ??
+2. MySQL starts slower, Node.js fails ??
+3. Environment variables not loading ??
+
+====================================================
+SECTION 7 — SECURITY
+====================================================
+
+1. Run container as non-root user (USER).
+2. What is Docker Content Trust?
+3. Signed images and image provenance.
+4. What is seccomp?
+5. Capabilities in Docker (--cap-add, --cap-drop).
+6. Docker daemon security risks.
+7. Why avoid exposing Docker socket (/var/run/docker.sock) to containers.
+
+SCENARIOS:
+1. Security audit fails ??
+2. Container has too many permissions ??
+3. Malware found in image ??
+
+====================================================
+SECTION 8 — DOCKER LOGGING & MONITORING
+====================================================
+
+1. Docker log driver types: json-file, syslog, fluentd, awslogs, gcplogs.
+2. Configuring logging drivers per daemon or per container.
+3. Container CPU/memory monitoring (docker stats, cgroups).
+4. docker stats command and metrics.
+
+SCENARIOS:
+1. Logs missing ??
+2. Container using too much memory ??
+
+
+====================================================
+SECTION 9 — TROUBLESHOOTING & REAL INTERVIEW SCENARIOS
+====================================================
+
+Scenario 1 — Container cannot connect to DB
+
+Scenario 2 — Image build stuck
+
+Scenario 3 — Port already in use
+
+Scenario 4 — Permission denied writing files in container
+
+Scenario 5 — "No space left on device"
+
+Scenario 6 — "ImagePullBackOff" in Kubernetes
+
+Scenario 7 - "Not able to run docker without sudo user"
+
+====================================================
+END OF ASSIGNMENT
+================================================================
+SECTION 8 — DOCKER LOGGING & MONITORING
+====================================================
+
+1. Docker log driver types: json-file, syslog, fluentd, awslogs, gcplogs.
+2. Conf
