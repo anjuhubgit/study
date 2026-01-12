@@ -1,0 +1,18 @@
+docker build -t anju .
+   75  docker images
+   76  docker run -d -p 80:3000 anju
+   77  docker ps
+   78  history
+   79  sudo docker ps
+   80  docker logs 8353787472ec
+   sudo docker exec -it 5bf0f319869b curl http://172.17.0.2:8080
+   
+   docker file
+FROM node:12 as build
+WORKDIR /app
+COPY package*.json ./
+RUN npm install --legacy-peer-deps
+COPY . .
+RUN npm run build
+EXPOSE 3000
+CMD ["npm", "start"]
