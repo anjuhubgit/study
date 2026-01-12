@@ -16,3 +16,92 @@ COPY . .
 RUN npm run build
 EXPOSE 3000
 CMD ["npm", "start"]
+
+--------
+3. Verify your nginx.conf
+You added the COPY nginx.conf line. If that file is misconfigured, Nginx might be looking in the wrong place. Ensure your local nginx.conf looks exactly like this:
+
+Nginx
+
+server {
+    listen 80;
+    server_name localhost;
+
+    location / {
+        root   /usr/share/nginx/html;
+        index  index.html index.htm;
+        try_files $uri $uri/ /index.html;
+    }
+}
+
+pacakage.json
+1. The Essential Change
+In your package.json, find this line: "homepage": "https://aditya-sridhar.github.io/simple-reactjs-app",
+
+Change it to: "homepage": ".",
+
+Why is this necessary?
+When you use a specific URL in the homepage field, react-scripts build assumes the application is being hosted in a sub-folder (in your case, a folder named /simple-reactjs-app/).
+
+Because of this, the generated index.html tries to load your JavaScript and CSS files from: http://<your-ip>/simple-reactjs-app/static/js/main.js
+
+However, in your Nginx Docker container, those files are actually located at: http://<your-ip>/static/js/main.js
+
+By setting "homepage": ".", you tell React to use relative paths. This allows the app to find its files regardless of whether it's on GitHub Pages or your EC2 Public IP.
+
+2. Updated package.json Structure
+Your file should look like this:
+
+JSON
+
+{
+  "name": "simple-reactjs-app",
+  "version": "0.1.0",
+  "private": true,
+  "homepage": ".", 
+  "dependencies": {
+    "axios": "^0.18.0",
+    "react": "^16.4.1",
+    "react-bootstrap": "^0.32.1",
+    "react-dom": "^16.4.1",
+    "react-router-dom": "^4.3.1",
+    "react-scripts": "1.1.4"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
+  },
+  "devDependencies": {
+    "gh-pages": "^1.2.0"
+  }
+}
+3. Next Steps to Deploy
+After saving the change to package.json, you must rebuild your Docker image because the "build" happens during the image creation phase.
+
+Run these commands on your Amazon Linux instance:
+
+Rebuild the image: docker build -t simple-react-app .
+
+Stop the old container: docker stop <container_id>
+
+Run the new container: docker run -d -p 80:80 simple-react-app
+
+
+dockerfile 
+FROM node:12 as build
+WORKDIR /app
+COPY package*.json ./
+RUN npm install --legacy-peer-deps
+COPY . .
+RUN npm run build
+
+FROM nginx:alpine
+COPY --from=build /app/build /usr/share/nginx/html
+# Add this line:
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
