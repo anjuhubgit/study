@@ -1,0 +1,328 @@
+1.Monolithic Arhcitecture
+2.Micro-services
+3.Containers
+4.Physical vm Containers
+5.Docker
+6.Container Orchestration Engine
+7.Top 3 Container Orchestration engines
+8.Kubernetes
+9.Kubernetes Architecture
+10.Installation methods of Kubernetes
+11.Kubectl
+12.Play with k8s
+13.Minikube
+14.Google Kubernetes Engine
+15.Kube adm
+16.Kube adm demo
+17.Pods
+18.Replication controller - The Replication Controller operates on a reconciliation loop. It constantly compares the desired state (defined in your YAML) to the actual state (what’s happening in the cluster).
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: my-nginx
+spec:
+  replicas: 3
+  selector:
+    app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx
+19.Replicaset - Think of a ReplicaSet (RS) as the next generation of the Replication Controller. While they both share the same primary goal—ensuring a specific number of pods are running at all times—the ReplicaSet is more flexible and is the modern engine under the hood of Kubernetes.
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: web-rs
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      tier: frontend
+    matchExpressions:
+      - {key: tier, operator: In, values: [frontend, web-server]}
+  template:
+    metadata:
+      labels:
+        tier: frontend
+    spec:
+      containers:
+      - name: nginx
+        image: nginx
+20.Deployments - If the Replication Controller is a supervisor and the ReplicaSet is the engine, a Deployment is the Manager.
+In modern Kubernetes, you almost never manage pods or ReplicaSets directly. Instead, you define a Deployment. It is a high-level object that allows you to describe your application's desired state, and it handles the "heavy lifting" of getting there—especially during updates.
+
+Why use a Deployment?
+A Deployment provides several critical features that a ReplicaSet alone cannot handle:
+
+Rolling Updates: It replaces old pods with new ones gradually, ensuring zero downtime.
+
+Rollbacks: If a new version of your app is buggy, you can tell the Deployment to "undo" the change and go back to the previous stable version.
+
+Pause/Resume: You can pause a deployment, make multiple changes to the pod template, and then resume it to trigger a single rollout.
+
+Self-Healing: If a node dies, the Deployment ensures the pods are recreated on a healthy node.
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.21.1 # Changing this triggers a rollout
+        ports:
+        - containerPort: 80
+21.Services - In Kubernetes, a Service is an abstraction that defines a logical set of Pods and a policy by which to access them.
+Think of it this way: Pods are mortal. They are created and destroyed constantly (e.g., during a deployment or a node failure). If you rely on a Pod's specific IP address to connect to it, your application will break the moment that Pod is replaced. A Service provides a single, constant IP address and DNS name that stays the same, even as the underlying Pods come and go.
+
+How it Works: The SelectorA Service finds the Pods it should direct traffic to using Labels and Selectors. If a Service is looking for app: backend, it will send traffic to any Pod in the cluster that has that label.The 4 Main Types of ServicesKubernetes offers different types of Services depending on how you want to expose your application:TypeUse CaseAccessibility
+ClusterIPInternal communication between apps.Only inside the cluster.
+NodePortQuick testing or simple external access.On a specific port of every Node IP.
+LoadBalancerStandard for production apps in the cloud.
+External IP via cloud provider (AWS, GCP, Azure).ExternalNameMapping a service to a DNS name (e.g., a DB).External to the cluster
+1. ClusterIP (Default)
+This is the most common type. It gives the service an internal IP address. Other pods in the cluster can talk to it, but the outside world cannot. Use this for your databases or internal API layers.
+
+2. NodePort
+This opens a specific port (usually between 30000–32767) on every single Node (VM) in your cluster. If you hit NodeIP:Port, it routes you to the Service. It's rarely used in production because it's less secure and harder to manage at scale.
+
+3. LoadBalancer
+When running in a cloud environment, this type tells your cloud provider to spin up a physical Load Balancer (like an AWS ALB or Google Cloud LB). This provides a single public IP address that routes traffic into your cluster.
+
+Example Service YAML
+This Service would sit in front of the "nginx" pods we discussed in the Deployment section:
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-web-service
+spec:
+  type: ClusterIP  # Internal only
+  selector:
+    app: nginx     # Matches the labels on your Pods
+  ports:
+    - protocol: TCP
+      port: 80         # The port the SERVICE listens on
+      targetPort: 80   # The port the POD is listening on
+22.Node-Port services
+23.Load Balancing service
+24.Cluster-IP service
+25.Storage volume types
+In Kubernetes, a Volume is essentially a directory, possibly with some data in it, which is accessible to the containers in a pod.By default, containers are ephemeral—if a container crashes or restarts, any data written to its internal file system is lost forever. Volumes solve this by decoupling the storage from the container lifecycle.
+1. Ephemeral Volume TypesThese volumes live and die with the Pod. If the Pod is deleted, the data is gone.
+emptyDir: A simple empty directory created when a Pod is assigned to a node. It’s great for temporary cache or scratch space.
+configMap / secret: These inject configuration data or sensitive keys (passwords) into the pod as files.
+2. Persistent Volume TypesThese are designed for "stateful" applications (like databases) where data must survive even if the Pod is deleted or moved to a different node.hostPath: Mounts a file or directory from the host node's filesystem into your Pod. (Used mostly for system-level tools, not recommended for general apps).Cloud-based Storage: Specific drivers for cloud providers, such as:awsElasticBlockStore (AWS EBS)gcePersistentDisk (Google Cloud PD)azureDisk (Azure Disk)Network File Systems: Standards like NFS or Ceph that allow multiple pods to read/write to the same storage simultaneously.3. The Persistent Storage WorkflowIn a professional setup, developers don't usually define the specific storage hardware in their Pod YAML. Instead, Kubernetes uses a "Claim" system:PersistentVolume (PV): A piece of storage in the cluster provisioned by an administrator (or a cloud tool). It's a resource like a Node.PersistentVolumeClaim (PVC): A request for storage by a user. It’s like a "voucher" that says, "I need 5GB of storage with ReadWrite access."StorageClass: A "profile" that automates the creation of PVs (e.g., "fast-ssd" vs "slow-hdd").Summary Table: Which one to use?TypePersistenceBest Use CaseemptyDirNo (Pod-level)Temp cache, processing buffers.hostPathYes (Node-level)Monitoring tools that need node logs.NFSYes (Cluster-level)Shared assets like images or web content.PV / PVCYes (Cluster-level)Databases (MySQL, Postgres, etc.)Example Snippet (PVC)Here is how a Pod "requests" persistent storage:YAMLapiVersion: v1
+kind: Pod
+metadata:
+  name: storage-pod
+spec:
+  containers:
+  - name: my-db
+    image: postgres
+    volumeMounts:
+    - mountPath: "/var/lib/postgresql/data"
+      name: my-storage
+  volumes:
+  - name: my-storage
+    persistentVolumeClaim:
+      claimName: my-pvc-request # The "voucher" for storage
+26.Empty DIR Volume
+27.Hostpath volume
+In the Kubernetes storage family, a hostPath volume is the "neighborhood mechanic" of volumes. It mounts a file or directory from the host node's filesystem directly into your Pod.While most Kubernetes volumes are designed to be "abstract" (so the Pod doesn't care which server it's running on), hostPath is explicitly tied to the specific physical or virtual machine (Node) where the Pod is currently sitting.How it WorksWhen you define a hostPath, you are telling Kubernetes: "Go to the hard drive of the specific Minion/Node running this Pod, find the folder at /data/logs, and let my container see it."Common Use CasesBecause hostPath creates a security risk and ties Pods to specific nodes, it is generally not used for regular applications. It is mostly used for system-level tools:Running Monitoring Agents: A Pod that needs to read the Node's log files (like Fluentd or Logstash).Running System Daemons: A Pod that needs to access the Node's Docker internals (like mounting /var/run/docker.sock).Local Testing: On a single-node cluster (like Minikube), it's a quick way to persist data.The Big Catch: Why it's "Dangerous"The major downside to hostPath is that it breaks the "cloud-native" promise of portability.Node Dependency: If your Pod dies and restarts on Node B, but its data was on Node A, the Pod will start with an empty directory or find completely different data.Security Risks: If a container is compromised, a hostPath volume could allow an attacker to access sensitive files on the host operating system (like /etc/shadow).Scheduling Issues: If you have 50 nodes and only one has the required data folder, the scheduler will have a hard time placing your Pod.Example YAML DefinitionHere is how you would map a directory from your worker node into a container:YAMLapiVersion: v1
+kind: Pod
+metadata:
+  name: hostpath-example
+spec:
+  containers:
+  - name: log-reader
+    image: busybox
+    volumeMounts:
+    - mountPath: /container/logs # Where the pod sees it
+      name: node-log-dir
+  volumes:
+  - name: node-log-dir
+    hostPath:
+      path: /var/log/system      # The actual path on the worker node
+      type: Directory            # Optional: ensures the path exists as a directory
+Comparison: hostPath vs. local PVIf you find yourself needing to use local storage for performance (like a fast NVMe drive on a specific server), Kubernetes now recommends using a Local Persistent Volume instead of hostPath.FeaturehostPathLocal Persistent VolumePersistenceTied to nodeTied to nodeSchedulingManual/RiskyKubernetes "remembers" which node the data is onBest ForSystem tools/loggingHigh-performance databases
+28.GCE persistent disk
+In the Google Cloud ecosystem, GCE Persistent Disk (PD) is the primary network-attached storage solution for your Kubernetes pods. When you run a cluster on Google Kubernetes Engine (GKE), this is the "go-to" storage for your databases and stateful apps.Think of it as a virtual hard drive that exists in the cloud, rather than on a physical server. Because it is network-attached, it can be detached from one node and re-attached to another instantly if your pod moves.Why use GCE Persistent Disk?Unlike the hostPath volumes we discussed earlier, GCE PDs are independent of your worker nodes.Durability: Data is stored redundantly across multiple physical disks to prevent loss.Portability: If a node fails, Kubernetes can simply unmount the PD from the dead node and mount it to a new, healthy node. Your data follows the pod.Snapshots: You can take "backups" of your disks while they are running.Dynamic Resizing: You can grow the disk size on the fly without restarting your pods.The 4 Main Types of GCE PDDepending on your performance needs and budget, you can choose different "flavors" of disks:Disk TypeName in K8sBest ForStandardpd-standardBacked by HDD. Good for big data and sequential I/O (cheap).Balancedpd-balancedBacked by SSD. The general-purpose middle ground (default in newer GKE).Performancepd-ssdHigh-performance SSD for databases like MySQL or Postgres.Extremepd-extremeUltra-high IOPS for the most demanding enterprise workloads.Zonal vs. Regional PDsThis is a critical distinction for high availability (HA):Zonal PD: Lives in a single zone (e.g., us-central1-a). If that entire zone goes down, your data is temporarily inaccessible.Regional PD: Synchronously replicates data across two zones in the same region. If one zone fails, your pod can restart in the second zone and find its data ready to go immediately. This is the gold standard for HA databases.How to use it (The GKE Way)In GKE, you don't usually create the disk manually. You use a StorageClass, and GKE creates the disk for you when you ask for it via a PersistentVolumeClaim (PVC).YAMLapiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: fast-ssd
+provisioner: pd.csi.storage.gke.io # The GKE engine
+parameters:
+  type: pd-ssd                     # High performance
+  replication-type: none           # Zonal (use 'regional-pd' for HA)
+The Request (PVC)YAMLapiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: my-disk-claim
+spec:
+  storageClassName: fast-ssd
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 50Gi
+Important Limitation: GCE Persistent Disks are block storage. By default, they support ReadWriteOnce, meaning only one node can write to the disk at a time. If you need many pods on different nodes to write to the same folder, you should look at Google Filestore (NFS) instead
+29.PV and PVC
+Think of PV (Persistent Volume) and PVC (Persistent Volume Claim) as the "Real Estate" market of Kubernetes storage.In a professional cluster, developers shouldn't have to care if the storage is an AWS EBS disk, a Google Cloud PD, or a physical hard drive in a rack. The PV/PVC system hides those details, allowing for a clean separation of concerns.1. Persistent Volume (PV) - The "Supply"A Persistent Volume is a piece of storage in the cluster that has been provisioned by an administrator or a storage class. It is a cluster-level resource (like a Node) and exists independently of any individual Pod.Who creates it? Usually a Cluster Admin or an automated "Storage Class."What does it define? The actual capacity (e.g., 50GB), the access mode, and the specific storage technology (NFS, iSCSI, Cloud Disk).2. Persistent Volume Claim (PVC) - The "Request"A Persistent Volume Claim is a request for storage by a user. If a developer needs 10GB of fast storage for a database, they create a PVC.Who creates it? The Developer (or the application's deployment script).What does it define? The size needed, the "speed" (StorageClass), and how it will be accessed (e.g., "I need to be able to read and write from one node").How They Work Together (The Analogy)To make it simple, compare it to hiring a car:Persistent Volume (PV): The actual physical car sitting in the rental lot.Persistent Volume Claim (PVC): Your reservation where you say, "I need a mid-sized SUV with an automatic transmission."Binding: When the rental agency finds an SUV that matches your request and hands you the keys. In K8s, once a PVC finds a matching PV, they are Bound.Access Modes: How do you want to use it?When defining a PV or PVC, you must specify how the pods will talk to the disk:Access ModeAbbreviationMeaningReadWriteOnceRWOOnly one node can mount the disk for reading and writing.ReadOnlyManyROXMany nodes can mount it, but only for reading (great for static web assets).ReadWriteManyRWXMany nodes can read and write simultaneously (requires specialized storage like NFS).Example WorkflowHere is how you actually connect them to your app:Step 1: The Claim (The Developer says "I need this")YAMLapiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: my-app-data
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+Step 2: The Pod (The Developer uses the "Voucher")YAMLapiVersion: v1
+kind: Pod
+metadata:
+  name: my-app
+spec:
+  containers:
+    - name: app-container
+      image: nginx
+      volumeMounts:
+      - mountPath: "/data"
+        name: my-volume
+  volumes:
+    - name: my-volume
+      persistentVolumeClaim:
+        claimName: my-app-data # Links to the PVC above
+Static vs. Dynamic ProvisioningStatic: An admin manually creates 10 different PVs, and PVCs "grab" them as needed.Dynamic (Modern): An admin creates a StorageClass. When a user creates a PVC, Kubernetes automatically talks to the cloud provider (AWS/GCP/Azure), creates a disk on the fly, and turns it into a PV. This is the gold standard.
+30.Static volume provisioning
+In the early days of Kubernetes, Static Volume Provisioning was the only way to handle storage. While most modern clusters use "Dynamic Provisioning" (where disks are created automatically), understanding the static method is crucial for managing on-premise hardware or legacy systems.Think of Static Provisioning like a manual library system: The librarian (Admin) must physically buy the books and put them on the shelf before a student (Developer) can check them out.The Manual WorkflowIn this model, there is no "magic" automation. A human cluster administrator has to do the heavy lifting before an application can ever request storage.Preparation: The Admin creates a real storage asset (e.g., an NFS share, a physical SSD, or a cloud disk).The PV (Supply): The Admin creates a PersistentVolume (PV) object in Kubernetes that points specifically to that real storage.The PVC (Demand): A developer creates a PersistentVolumeClaim (PVC).The Binding: Kubernetes looks at the available "pool" of manually created PVs. If it finds one that matches the size and access mode of the PVC, it "binds" them together.When do you use Static Provisioning?Even though it's more work, it’s still used in specific scenarios:On-Premise Hardware: When you have a fixed SAN or high-performance local drives that aren't integrated with a cloud API.Bare Metal Clusters: Where there is no "cloud controller" to spin up disks on demand.Data Migration: When you already have a disk full of data and you want to "mount" it into a new Kubernetes cluster without the system deleting or reformatting it.Comparison: Static vs. DynamicFeatureStatic ProvisioningDynamic ProvisioningEffortHigh (Manual admin work)Low (Automated)Object NeededPersistentVolume (PV)StorageClassScalabilityHard (Admin must pre-create PVs)Easy (Disks created on demand)AnalogyBuying a specific car from a lot.Ordering a custom Uber via an app.Example: A Static SetupIn this example, the Admin must create the PV before the Developer creates the PVC.1. The Admin's Work (The PV)YAMLapiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: static-pv-01
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/mnt/data" # Manually points to a specific folder on a node
+2. The Developer's Request (The PVC)YAMLapiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: task-pv-claim
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi # K8s will find 'static-pv-01' and bind to it
+The Downside of Static ProvisioningThe biggest headache is resource waste. If an Admin creates a 100GB PV and a Developer's PVC only asks for 20GB, Kubernetes will bind them, and the remaining 80GB is essentially trapped and unusable by others.
+31.Dynamic volume provisioning - Dynamic Volume Provisioning is the modern, automated way to handle storage in Kubernetes. It eliminates the need for cluster administrators to pre-create storage volumes (the "static" way).Instead of an admin manually creating a disk and then a PersistentVolume (PV), the cluster automatically provisions the storage the moment a user requests it via a PersistentVolumeClaim (PVC).How it Works: The "Vending Machine" AnalogyThink of Dynamic Provisioning like a soda vending machine:StorageClass (The Machine): The admin sets up the machine and decides what "drinks" are available (SSD, HDD, etc.).PVC (The Button): The developer pushes a button saying, "I want a 10GB SSD."PV (The Soda): The machine instantly creates the 10GB SSD, puts it in a PV "bottle," and hands it to the developer.The Key Component: StorageClassThe "brain" behind dynamic provisioning is the StorageClass. It acts as a blueprint or profile for the storage you want. It defines:Provisioner: Which driver should create the disk (e.g., AWS EBS, GCP PD, Azure Disk, or Ceph).Parameters: Specific details like "type: ssd" or "iops: 5000".Reclaim Policy: What happens to the disk when the PVC is deleted (e.g., Delete the disk or Retain it).The Workflow Step-by-StepAdmin creates a StorageClass: This is done once.Developer creates a PVC: The PVC specifically names that storageClassName.Automatic Provisioning: Kubernetes sees the request, talks to the Cloud Provider API (like AWS or GCP), and creates a real disk.Binding: Kubernetes automatically creates a PersistentVolume (PV) that represents that new disk and binds it to the PVC.Why is it better than Static?FeatureStatic ProvisioningDynamic ProvisioningSpeedManual (Hours/Days for tickets)Instant (Seconds)EfficiencyOften wastes space (oversized PVs)Exact size requested is createdMaintenanceAdmins must manage thousands of PVsAdmins manage a few StorageClassesScalabilityHard to scale with many appsInfinite scalabilityExample YAMLTo use dynamic provisioning, you only need to define a StorageClass (once) and your PVC.1. The StorageClass (Admin defines the "Flavor")YAMLapiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: fast-storage
+provisioner: kubernetes.io/aws-ebs # Or pd.csi.storage.gke.io for GCP
+parameters:
+  type: gp3
+  fsType: ext4
+2. The PVC (Developer makes the "Request")YAMLapiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: database-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: fast-storage # Matches the name above
+  resources:
+    requests:
+      storage: 20Gi # K8s will now go create exactly 20GB of gp3 storage
+32.Configmaps 
+Gemini said
+In Kubernetes, a ConfigMap is a "lockbox" for your configuration settings. It allows you to decouple your environment-specific configuration (like database URLs, hostnames, or log levels) from your application code and container images.
+
+Without ConfigMaps, you would have to hardcode your settings inside your image or rebuild your container every time you moved from "Development" to "Production." With ConfigMaps, you can use the exact same container image across all environments and just swap out the settings.
+
+How It Works
+A ConfigMap stores data as key-value pairs. Your application can consume this data in two main ways:
+
+Environment Variables: Injecting specific keys as variables inside the container.
+
+Files in a Volume: Mounting the entire ConfigMap as a directory where each key becomes a filename and the value becomes the file content.
+
+When to Use ConfigMaps (and when not to)
+Use it for: db_host: "prod-db.example.com", log_level: "debug", or entire configuration files like nginx.conf or redis.conf.
+
+Do NOT use it for: Sensitive data like passwords, API keys, or certificates. For those, you should use Secrets, which are similar to ConfigMaps but provide basic encryption (Base64 encoding) and more secure handling within the cluster.
+
+Example: Creating a ConfigMap
+You can define your settings in a simple YAML file:
+
+YAML
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-settings
+data:
+  # Simple key-value pairs
+  database_url: "postgres://db.internal.com:5432"
+  log_level: "INFO"
+  # You can even store entire files
+  ui_config.json: |
+    {
+      "color": "blue",
+      "feature_flag": true
+    }
+How a Pod Consumes the ConfigMap
+Here is how you would tell your Pod to use those settings:
+
+Option A: As Environment Variables
+YAML
+spec:
+  containers:
+    - name: my-app
+      image: my-app-image
+      env:
+        - name: DB_URL
+          valueFrom:
+            configMapKeyRef:
+              name: app-settings
+              key: database_url
+Option B: As a Mounted Volume
+YAML
+spec:
+  containers:
+    - name: my-app
+      image: my-app-image
+      volumeMounts:
+      - name: config-volume
+        mountPath: /etc/config
+  volumes:
+    - name: config-volume
+      configMap:
+        name: app-settings
+Key Benefits
+Immutability of Images: Your container image remains a "constant."
+
+Easy Updates: If you change a ConfigMap value and your app is set up to watch the file system (Volume mount), the app can receive the update without a restart.
+
+Environmental Consistency: You can have one ConfigMap for dev and another for prod while the underlying Deployment stays the same.
+33.Daemonset
+34.Secrets
+35.Jobs
