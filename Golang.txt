@@ -1,0 +1,313 @@
+Golang
+
+Timestapms:
+00:00:00 Intro
+00:03:40 Why Golang
+The best way to understand "Why Go?" is to look at the gap it fills. Before Go, developers usually had to choose between speed (C++, Rust) or productivity (Python, Ruby).Google created Go because they wanted a language that didn't make them compromise.1. Concurrency as a First-Class CitizenIn most languages, running multiple tasks simultaneously (concurrency) is an afterthought that requires complex libraries and heavy system threads. Go was built for the multi-core era.Goroutines: These are "virtual threads" managed by the Go runtime. While a standard OS thread might take 1MB of memory, a Goroutine starts at about 2KB. You can literally run millions of them on a standard laptop without crashing.Channels: Instead of sharing a global variable (which leads to data corruption), Go uses "channels" to pass data between Goroutines like a relay race baton.2. Blazing Build SpeedsIf you've ever worked on a large C++ or Java project, you know the "compile-time coffee break"—where you wait minutes for the code to build.Go's dependency management and compiler are designed for speed. Even massive projects with thousands of files usually compile in seconds. This allows for a "trial and error" workflow that feels as fast as an interpreted language like JavaScript, but with the performance of a compiled one.3. The "No-Magic" PhilosophyGo is intentionally boring. It lacks many complex features found in other languages:No Classes or Inheritance: It uses simple structures (structs) and interfaces.No Exceptions: It uses explicit error returns (e.g., if err != nil).No Overloading: There is usually only one way to do things.This makes Go code incredibly readable. You can jump into a Go project you've never seen before and understand exactly what is happening because there are no hidden "magic" abstractions.4. Deployment Simplicity (The Single Binary)In many languages, deploying an app is a nightmare of dependencies (e.g., "Do I have the right version of Python installed on the server?").Go compiles everything—your code, the libraries, and the runtime—into one single static binary file.You build the file on your machine.You copy that one file to the server.It just runs.5. Performance at ScaleGo is a "low-latency" language. While it has a Garbage Collector (GC) to manage memory, the Go team has optimized it so heavily that "stop-the-world" pauses (where the app freezes to clean up memory) are usually less than 1 millisecond.LanguageExecution SpeedDevelopment SpeedPythonSlowVery FastC++Very FastSlow / ComplexGoFastFastUse Cases: When should you use it?Cloud Native Tools: (Docker, Kubernetes, and Terraform are all Go).Microservices: Because of the low memory footprint and fast startup.Backend Web APIs: High-concurrency handling makes it perfect for servers.DevOps/CLI Tools: Fast execution and easy distribution.
+00:09:22 Golang installation
+Gemini said
+Installing Go is a straightforward process. Because Go compiles to a single binary, the "installation" is mostly about placing the Go tools on your machine and letting your terminal know where they are.
+
+1. Download the Installer
+Go to the official Go Downloads page and select the package for your operating system:
+
+Windows: Download the .msi file.
+
+macOS: Download the .pkg file (choose arm64 for Apple Silicon/M1/M2/M3 or amd64 for Intel).
+
+Linux: Download the .tar.gz archive.
+
+2. Installation Steps
+Windows
+Open the .msi file and follow the prompts.
+
+By default, Go is installed in C:\Go.
+
+The installer automatically adds the C:\Go\bin directory to your PATH environment variable.
+
+macOS
+Open the .pkg file and follow the installation wizard.
+
+It installs Go to /usr/local/go.
+
+It automatically adds /usr/local/go/bin to your PATH.
+
+Linux
+Extract the archive into /usr/local (you'll likely need sudo):
+
+Bash
+rm -rf /usr/local/go && tar -C /usr/local -xzf go1.xx.x.linux-amd64.tar.gz
+Add Go to your PATH by adding this line to your ~/.profile or ~/.bashrc:
+
+Bash
+export PATH=$PATH:/usr/local/go/bin
+Run source ~/.profile to apply the changes.
+
+3. Verify the Installation
+Open your terminal (Command Prompt or PowerShell on Windows, Terminal on macOS/Linux) and type:
+
+Bash
+go version
+If you see something like go version go1.22.x darwin/arm64, congratulations! You're ready to go.
+
+4. Setting up your Workspace
+Modern Go uses Go Modules, which means you can start a project in any folder you like. You no longer need to keep all your code in a specific GOPATH folder.
+
+To start a new project:
+
+Create a folder: mkdir my-go-app && cd my-go-app
+
+Initialize the module: go mod init my-go-app
+
+Create a file named main.go and start coding!
+
+Recommended Editor: VS Code
+While you can use any text editor, Visual Studio Code is the community favorite for Go.
+
+Install VS Code.
+
+Search for the Go extension (by Google/Go Team) in the Extensions Marketplace.
+
+Once installed, open a .go file. VS Code will ask to install "Analysis Tools"—click Install All. This gives you powerful autocomplete, formatting, and debugging features.
+00:12:00 Hello world program
+Gemini said
+Now that you have Go installed, let’s get your first program running. In Go, the entry point for any executable is a function called main inside a package also called main.
+
+1. Create Your Project Folder
+Go uses Modules to manage dependencies. Even for a simple "Hello World," it's best practice to initialize a module. Open your terminal and run:
+
+Bash
+mkdir hello-go
+cd hello-go
+go mod init hello-go
+This creates a go.mod file which tracks your project's identity.
+
+2. Write the Code
+Create a file named main.go in that folder and paste the following:
+
+Go
+package main
+
+import "fmt"
+
+func main() {
+    fmt.Println("Hello, Gopher! Welcome to Go.")
+}
+Breaking Down the Code:
+package main: This tells the Go compiler that this file should compile as an executable program rather than a shared library.
+
+import "fmt": Short for "format." This package contains functions for formatting text, including printing to the console.
+
+func main(): This is where the execution starts. When you run the program, the code inside these braces { } is what happens.
+
+3. Run the Program
+You have two main ways to interact with your code:
+
+Option A: Run directly (Great for development)
+This compiles and executes the code in one step without saving a permanent binary file:
+
+Bash
+go run main.go
+Option B: Build a binary (Great for distribution)
+This creates an executable file (e.g., hello-go.exe on Windows or hello-go on Mac/Linux):
+
+Bash
+go build
+./hello-go
+The Go Workflow
+Unlike some languages where you have to manage complex project structures, the Go workflow is designed to be linear and predictable.
+
+Quick Tips for Beginners:
+Strict Syntax: Go will throw an error if you import a package (like fmt) but don't use it. This keeps your code clean!
+
+Formatting: You don't have to worry about tabs vs. spaces. Run go fmt main.go and Go will automatically fix your indentation to the community standard.
+
+Case Sensitivity: In Go, if a function starts with an Upper Case letter (like Println), it is "exported" (public). If it starts with a lower case letter, it is private to that package.
+00:17:34 Simple values
+Gemini said
+In Go, types are explicit and strictly enforced, but the language is smart enough to "infer" them most of the time. Think of these as the basic building blocks the Gopher uses to build those massive skyscrapers.
+
+Here are the primary simple values you'll use every day:
+
+1. Strings
+Strings are sequences of characters. In Go, they are immutable (once created, you can't change a single character; you have to create a new string).
+
+Double quotes (" "): For standard strings (supports escape characters like \n).
+
+Backticks (` `): For raw strings (multiline strings where what you see is what you get).
+
+Go
+fmt.Println("Hello" + " " + "World") // Concatenation
+fmt.Println(`This is a 
+multi-line string`)
+2. Integers and Floats
+Go gives you precise control over numbers, though usually, you'll just use int and float64.
+
+Integers (int): Whole numbers.
+
+Floats (float64): Numbers with decimals.
+
+Go
+fmt.Println("1 + 1 =", 1+1)         // Integer math
+fmt.Println("7.0 / 3.0 =", 7.0/3.0) // Floating point math
+3. Booleans
+The simplest value of all: true or false. These are essential for the "If/Else" logic that tells your program what to do.
+
+Go
+fmt.Println(true && false) // AND: false
+fmt.Println(true || false) // OR:  true
+fmt.Println(!true)         // NOT: false
+4. Variables & Declaration
+There are two ways to tell Go about a value.
+
+The "Formal" Way (var)
+Used when you want to declare a variable but maybe not give it a value immediately, or when declaring variables outside of functions.
+
+Go
+var age int = 25
+var name = "Gopher" // Go infers this is a string
+The "Short" Way (:=)
+This is the most common way to declare and initialize variables inside functions. It’s concise and tells Go: "Figure out what type this is and create it for me."
+
+Go
+count := 10 
+isReady := true
+Summary Table
+Type	Example	Description
+string	"Go"	Textual data
+int	42	Whole numbers
+float64	3.14	Decimal numbers
+bool	true	Logical true/false
+A Quick "Gotcha" for Beginners
+Go is statically typed. This means you cannot do this:
+
+Go
+x := 10
+x = "Hello" // ERROR: cannot use "Hello" (type string) as type int in assignment
+Once a variable is an integer, it stays an integer for life!
+00:21:19 Variables
+In Go, variables are the containers for your data. Because Go is statically typed, the compiler needs to know exactly what kind of data is being stored in each "container" to ensure your program is safe and fast.There are two primary ways to declare variables in Go: the var keyword and the short declaration operator (:=).1. The var KeywordThe var keyword is the most flexible way to declare variables. You can use it inside or outside of functions.Explicit TypeYou tell Go exactly what the type is.Govar username string = "Gopher123"
+Type InferenceIf you provide an initial value, Go is smart enough to figure out the type for you.Govar score = 100 // Go sees 100 and knows this is an 'int'
+Zero ValuesIn Go, if you declare a variable without assigning it a value, it doesn't become undefined or null. Instead, it gets a Zero Value.Govar quantity int    // Initialized to 0
+var isPaused bool   // Initialized to false
+var price float64   // Initialized to 0.0
+var status string   // Initialized to "" (empty string)
+2. The Short Declaration (:=)This is the most common way to declare variables inside functions. It is concise and combines declaration and initialization into one step.Gofunc main() {
+    message := "Learning Go!" // Declares 'message' as a string and assigns value
+    age := 25                 // Declares 'age' as an int
+}
+Note: You cannot use := outside of a function (at the package level). You must use var there.3. Multiple DeclarationsGo allows you to be very efficient by declaring multiple variables on a single line.Govar x, y, z int = 1, 2, 3
+name, age, lightSpeed := "Albert", 76, 299792458
+4. Constants (const)If you have a value that should never change (like Pi or a fixed API URL), use const. Attempting to change a constant later will result in a compiler error.Goconst Pi = 3.14159
+const Language = "Go"
+Summary Table: Which to Use?MethodContextBest Used For...var name type = valueAnywhereBeing explicit or declaring without an initial value.var name = valueAnywherePackage-level variables (outside functions).name := valueInside Functions90% of your everyday coding inside functions.const name = valueAnywhereFixed values that should never be reassigned.A Vital Rule: The "No Waste" PolicyThe Go compiler is famous for being strict. If you declare a variable but never use it, your code will refuse to compile.Gofunc main() {
+    x := 5 // If you don't use 'x' later, Go will throw an error!
+}
+This keeps Go programs lean and prevents "dead code" from cluttering your project.
+00:29:08 Constants
+00:34:00 For loops
+In Go, there is a famous saying: "Go has only one looping construct: the for loop." While other languages have while, do-while, and foreach, Go keeps it simple by making the for loop versatile enough to handle every scenario.1. The Standard "C-Style" LoopThis is the most common version, used when you know exactly how many times you want to run. It has three parts: initialization, condition, and post-statement.Gofor i := 0; i < 5; i++ {
+    fmt.Println("Gopher iteration:", i)
+}
+2. The "While" Loop (Go Style)Go doesn't have a while keyword. Instead, you just drop the initialization and post-statement. If you only provide a condition, it acts exactly like a while loop.Gocount := 1
+for count <= 3 {
+    fmt.Println("Count is:", count)
+    count++
+}
+3. The Infinite LoopIf you leave out the condition entirely, the loop runs forever. This is commonly used in server development or background workers. You use break to exit.Gofor {
+    fmt.Println("Running forever...")
+    if someCondition {
+        break // Stop the loop
+    }
+}
+4. The "For-Range" Loop (Foreach)To iterate over a collection (like a Slice, Array, or Map), Go provides the range keyword. It returns two values: the index and the element.Gofruits := []string{"apple", "banana", "cherry"}
+
+for index, value := range fruits {
+    fmt.Printf("Index %d has fruit %s\n", index, value)
+}
+The "Blank Identifier" (_)If you don't need the index, Go won't let you leave it there unused (remember the "No Waste" policy!). You must use an underscore to tell the compiler to ignore it.Gofor _, value := range fruits {
+    fmt.Println("Fruit:", value) // We ignored the index
+}
+5. Control KeywordsSometimes you need to change the flow of the loop mid-way:break: Exits the loop immediately.continue: Skips the rest of the current iteration and starts the next one.Loop TypeSyntaxBest Use CaseStandardfor i := 0; i < n; i++Basic counting / fixed ranges.Condition-onlyfor condition { ... }When waiting for a specific state (While).Infinitefor { ... }Servers, listeners, or manual control.Rangefor i, v := range collIterating through lists or dictionaries.
+00:41:58 If Else
+In Go, if and else work much like they do in other languages, but with a few "Gopher-style" twists that make the code cleaner and more readable.The most important thing to remember: Parentheses () are optional, but curly braces {} are mandatory.1. Basic If-ElseThe simplest form of a conditional check looks like this:Goscore := 85
+
+if score >= 60 {
+    fmt.Println("You passed!")
+} else {
+    fmt.Println("Try again.")
+}
+2. The "Else If" LadderWhen you have multiple conditions to check, you chain them together. Go doesn't have a specific elif keyword; it just uses else if.Gotemp := 25
+
+if temp > 30 {
+    fmt.Println("It's hot!")
+} else if temp < 10 {
+    fmt.Println("It's cold!")
+} else {
+    fmt.Println("It's just right.")
+}
+3. The "If with Init" Statement (Unique to Go)This is a powerful feature often used for error handling. You can declare a short-lived variable inside the if-statement itself. This variable is only available within the scope of that if (and its else).Go// syntax: if [init]; [condition] { ... }
+
+if num := 10; num < 0 {
+    fmt.Println(num, "is negative")
+} else if num < 10 {
+    fmt.Println(num, "has 1 digit")
+} else {
+    fmt.Println(num, "has multiple digits")
+}
+// 'num' is no longer accessible here!
+4. Logical OperatorsYou can combine multiple conditions using standard logical operators:OperatorMeaningExample&&ANDif age > 18 && hasID { ... }||ORif isWeekend || isHoliday { ... }!NOTif !isLoggedIn { ... }5. Comparison OperatorsGo uses the standard set for comparing values:== (Equal to)!= (Not equal to)< , > (Less than, Greater than)<= , >= (Less than or equal, Greater than or equal)Why No Ternary Operator?You might notice there is no condition ? true : false in Go. The creators of Go intentionally left it out to keep the code's logic path very clear and easy to read. In Go, we prefer being explicit:Go Philosophy: Clear is better than clever. Use a full if/else block.Summary of Syntax RulesNo Parentheses: You don't need if (x > 0). Just if x > 0.Braces are Mandatory: Even if you only have one line of code, you must use { }.The else Position: The else must start on the same line as the closing brace } of the if block. If you move it to a new line, the compiler will throw an error.
+00:51:32 Switch statement
+01:02:14 Arrays
+Arrays in Go (Golang) are a bit of a "building block." While they are fundamental, you’ll actually find yourself using Slices much more often in daily coding because arrays have some rigid rules.Think of an array as a fixed-size container. Once you decide how many items it holds, that’s it—no growing, no shrinking.1. Defining an ArrayIn Go, an array's size is part of its type. This means [3]int and [5]int are considered completely different types of variables.Go// Declaration without initialization
+var names [3]string
+
+// Declaration with values (Array Literal)
+numbers := [5]int{10, 20, 30, 40, 50}
+
+// Let Go count the elements for you
+colors := [...]string{"Red", "Green", "Blue"} 
+2. Key CharacteristicsFixed Length: You cannot resize an array after declaration.Value Type: This is a big one. In many languages (like Java or Python), assigning an array to a new variable points to the same data. In Go, assigning an array copies the entire thing.Zero-Value: If you don't initialize the elements, they default to the "zero value" of the type (e.g., 0 for integers, "" for strings).3. Common OperationsOperationSyntaxDescriptionAccessarr[0]Access the first element (0-indexed).Updatearr[1] = 10Change the value at a specific index.Lengthlen(arr)Returns the number of elements.Iterationfor i, v := range arrThe standard way to loop through elements.4. Arrays vs. SlicesIf you're coming from another language, you probably want a dynamic list. In Go, that’s a Slice.Array: [3]int{1, 2, 3} (Fixed size)Slice: []int{1, 2, 3} (No number in the brackets; dynamic size)Pro-tip: Slices are actually "descriptors" for arrays. Under the hood, a slice points to an array. When you "append" to a slice, Go might create a new, larger array for you automatically.[Image comparing Go array vs Go slice memory structure]A Simple ExampleGopackage main
+import "fmt"
+
+func main() {
+    // A fixed array of 2 strings
+    var furniture [2]string
+    furniture[0] = "Chair"
+    furniture[1] = "Table"
+
+    fmt.Println("My furniture:", furniture)
+    fmt.Println("Total items:", len(furniture))
+}
+01:14:06 Slices
+If arrays are the rigid "building blocks" of Go, Slices are the flexible, high-performance tools you’ll use 99% of the time.A slice is a descriptor for a contiguous segment of an array. It doesn't actually store any data itself; it just describes a section of an underlying array.1. The Anatomy of a SliceA slice is a small struct that contains three things:Pointer: Where the slice starts in the underlying array.Length (len): How many elements are currently in the slice.Capacity (cap): How many elements the underlying array can hold, starting from the pointer.2. Creating SlicesThere are three common ways to create a slice:A. Slice LiteralThe easiest way. It looks like an array declaration but with empty brackets.GomySlice := []string{"Earth", "Mars", "Venus"}
+B. Using makeThis is the most efficient way if you know how much data you'll eventually hold.Go// make(type, length, capacity)
+numbers := make([]int, 5, 10) 
+C. Slicing an ArrayYou can "cut" a slice out of an existing array.Goplanets := [5]string{"Mercury", "Venus", "Earth", "Mars", "Jupiter"}
+rockyPlanets := planets[0:4] // Includes index 0, 1, 2, 3 (not 4)
+3. The append() FunctionSince slices are dynamic, you can add elements to them. If the underlying array is too small to fit a new element, Go automatically allocates a larger array, copies the old data over, and updates the slice's pointer.Gocities := []string{"Tokyo"}
+cities = append(cities, "New York", "London") 
+// cities now has a length of 3
+4. Key Differences: Array vs. SliceFeatureArraySliceDeclaration[3]int (Size required)[]int (Size omitted)ResizingImpossibleEasy via append()Passing to FunctionPassed by Value (Copies all data)Passed by Reference (Efficient)ComparisonCan compare with ==Can only compare to nil5. Be Careful: Shared StorageBecause multiple slices can point to the same underlying array, changing one slice can sometimes change another.Gooriginal := []int{1, 2, 3, 4}
+part := original[0:2] // {1, 2}
+
+part[0] = 99
+fmt.Println(original) // Output: [99, 2, 3, 4] — The original changed!
+[Image showing multiple Go slices pointing to the same underlying array]A Common PitfallNew Go developers often forget that append returns a new slice. Always assign the result back to your variable: s = append(s, "new item").
+01:39:45 Maps
+01:54:36 Range
+02:06:16 Functions
+02:18:07 Variadic Functions
+02:24:12 Closures
+02:29:23 Pointers
+02:39:40 Structs
+03:15:35 Interfaces
+03:43:17 Enums
+03:54:52 Generics
+04:09:40 Goroutines
+04:18:58 Wait groups
+04:24:51 Channels
+05:08:30 Mutex
+05:22:34 File handling
+06:04:04 Packages
+06:32:08 REST API Project

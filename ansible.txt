@@ -1,0 +1,275 @@
+Timeline and Topics
+00:00 Intro to Course
+01:17 Intro to Ansible
+08:32 Lab Setup 
+16:00 Ansible Installation
+Gemini said
+Installing Ansible is straightforward because it is agentless. You don't need to install any software on the nodes you want to manage; you only install Ansible on a single Control Node (your laptop or a management server).
+
+The Control Node must be a Unix-like system (Linux, macOS, or WSL on Windows).
+
+1. Prerequisites
+Before installing, ensure your Control Node has Python 3.9 or newer installed. Ansible is built on Python and uses it to execute modules.
+
+Bash
+python3 --version
+2. Installation Methods
+A. Using pip (Recommended for all OS)
+Installing via Python's package manager is often the best way to get the latest version and keep it isolated from system dependencies.
+
+Create a virtual environment (optional but best practice):
+
+Bash
+python3 -m venv ansible-venv
+source ansible-venv/bin/activate
+Install Ansible:
+
+Bash
+pip install ansible
+B. OS-Specific Package Managers
+If you prefer using your system's built-in tools:
+
+Operating System	Command
+Ubuntu / Debian	sudo apt update && sudo apt install ansible -y
+RHEL / CentOS	sudo dnf install epel-release && sudo dnf install ansible -y
+macOS (Homebrew)	brew install ansible
+Windows	Use WSL (Windows Subsystem for Linux), then follow Ubuntu steps.
+3. Verifying the Installation
+Once the installation is complete, check the version to ensure the binary is in your PATH:
+
+Bash
+ansible --version
+Tip: Look for the config file line in the output. By default, it might say none until you create an ansible.cfg file.
+
+4. Preparing the Managed Nodes
+Even though you don't install Ansible on the target "Managed Nodes," they need two things to be reachable:
+
+SSH Access: Your Control Node must have an SSH key authorized on the managed nodes.
+
+Python: The managed nodes must have Python installed (usually Python 2.7 or 3.x) so Ansible can run its modules there.
+
+5. Your First Test
+To verify everything is working, create a simple inventory file and "ping" your local machine:
+
+Create a file named hosts:
+
+Ini, TOML
+[local]
+localhost ansible_connection=local
+Run the ping module:
+
+Bash
+ansible all -i hosts -m ping
+If successful, you'll see a JSON response with "ping": "pong".
+21:15 First Ansible Playbook
+Now that you have Ansible installed, the real magic happens in a Playbook. Think of a Playbook as a "to-do list" for your servers. While a single command (Ad-hoc) is like shouting a quick order, a Playbook is a documented, repeatable script written in YAML.
+
+1. The Structure of a Playbook
+A Playbook is composed of one or more Plays. Each Play maps a group of hosts to specific Tasks.
+
+Hosts: Which servers am I talking to?
+
+Tasks: What do I want to do?
+
+Modules: The specific tools (like apt, copy, or service) used to perform the tasks.
+
+2. Creating Your First Playbook
+Let’s create a file named webserver_setup.yml. This playbook will update the package cache and install the Apache web server on a target machine.
+
+YAML
+---
+- name: Configure Web Servers
+  hosts: all
+  become: yes  # Runs tasks with sudo privileges
+
+  tasks:
+    - name: Ensure Apache is at the latest version
+      ansible.builtin.apt:
+        name: apache2
+        state: latest
+        update_cache: yes
+
+    - name: Ensure Apache is started and enabled
+      ansible.builtin.service:
+        name: apache2
+        state: started
+        enabled: yes
+
+    - name: Create a basic index.html file
+      ansible.builtin.copy:
+        content: "Hello from Ansible!"
+        dest: /var/www/html/index.html
+3. Breaking Down the Components
+become: yes: Tells Ansible to act as a superuser (sudo). Most system-level changes require this.
+
+ansible.builtin.apt: This is the module used for Debian/Ubuntu package management. (Use dnf for RHEL/CentOS).
+
+state: started: Ansible is idempotent. This means it won't just "run the start command"; it checks if Apache is already running. If it is, Ansible does nothing.
+
+4. Running the Playbook
+To execute your playbook against your inventory file (the hosts file we created earlier), use the ansible-playbook command:
+
+Bash
+ansible-playbook -i hosts webserver_setup.yml
+What the colors mean:
+Ok (Green): The task ran, but the system was already in the desired state (no changes made).
+
+Changed (Yellow): Ansible successfully modified the system to match your playbook.
+
+Failed (Red): Something went wrong (e.g., a typo or a network issue).
+
+5. Pro-Tip: The "Dry Run"
+Before you actually change anything on a production server, you can run a "Check Mode" to see what would happen without actually doing it:
+
+Bash
+ansible-playbook -i hosts webserver_setup.yml --check
+40:21 Overview of Ansible Playbook
+Think of an Ansible Playbook as a "Configuration Manual" for your infrastructure. While individual Ansible commands (Ad-hoc) are like shouting a single order, a Playbook is a documented, repeatable process that ensures your servers are exactly how you want them to be.Playbooks use YAML (Yet Another Markup Language) because it’s easy for humans to read and write.1. The Playbook HierarchyA Playbook is organized into a clear hierarchy. It’s helpful to visualize it like this:Playbook: The entire file (e.g., site.yml).Play: A mapping between a group of hosts and the tasks they should run.Tasks: Individual actions to be performed (e.g., "Install Nginx").Modules: The actual code that does the work (e.g., apt, copy, service).2. Key Components of a PlaybookWhen you look at a .yml file, you’ll see these common sections:ComponentPurposeExamplehostsDefines which servers the play applies to.hosts: webserversbecomeTells Ansible to use "sudo" for these tasks.become: yesvarsDefines variables to make the playbook reusable.http_port: 80tasksThe list of actions to execute in order.(See below)handlersTasks that only run if a previous task "Changed" something.notify: Restart Nginx3. The Power of IdempotencyThis is the "killer feature" of Playbooks. In a traditional script, if you run mkdir /data twice, the second time it fails because the directory exists.In an Ansible Playbook, you define the State:"I want the directory /data to exist."Run 1: Ansible sees it's missing, creates it (Changed).Run 2: Ansible sees it's already there, does nothing (OK).4. Advanced Playbook ConceptsOnce you master basic tasks, you can add intelligence to your playbooks:Conditionals (when): Only run a task if a certain condition is met (e.g., when: ansible_os_family == "Debian").Loops (loop): Run the same task multiple times with different values (e.g., installing a list of 10 packages).Templates (template): Use the Jinja2 engine to create dynamic configuration files (like putting the server's IP address inside a config file automatically).5. Typical Playbook WorkflowWrite: Create your .yml file.Lint: Check for syntax errors using ansible-lint.Check: Run with --check (Dry Run) to see what would change.Execute: Run ansible-playbook to apply the changes.Example: A Complete "Play"YAML---
+- name: Setup Database Server
+  hosts: db_servers
+  become: yes
+
+  tasks:
+    - name: Install MariaDB
+      ansible.builtin.package:
+        name: mariadb-server
+        state: present
+
+    - name: Start DB Service
+      ansible.builtin.service:
+        name: mariadb
+        state: started
+43:45 Ansible for remote server
+51:28 Installing App on Remote Server
+Gemini said
+To manage a remote server with Ansible, you move from "local testing" to the real-world Control Node vs. Managed Node architecture. Ansible uses SSH to communicate, meaning you don't need to install anything on the remote server except Python.
+
+1. The Inventory File
+The inventory file (usually named hosts or hosts.ini) tells Ansible where your remote servers are and how to talk to them.
+
+Example hosts.ini:
+
+Ini, TOML
+[webservers]
+192.168.1.100 ansible_user=ubuntu
+192.168.1.101 ansible_user=root
+
+[dbservers]
+db.example.com ansible_user=admin
+2. Setting Up SSH Access
+Ansible works best with SSH Key-based authentication. If you have to type a password every time, the automation becomes "manual."
+
+Generate a key (on your Control Node): ssh-keygen -t rsa -b 4096
+
+Copy it to the remote server: ssh-copy-id ubuntu@192.168.1.100
+
+Note: If you must use a password, you’ll need to install the sshpass utility on your Control Node and run Ansible with the --ask-pass flag.
+
+3. Testing the Connection
+Before running a complex playbook, use the Ping Module to verify that your SSH connection and Python environment are ready on the remote side.
+
+Bash
+ansible all -i hosts.ini -m ping
+all: Targets every server in the inventory.
+
+-i hosts.ini: Points to your inventory file.
+
+-m ping: Runs the "ping" module (verifies Python is available).
+
+4. Handling Privileges (become)
+Remote servers usually require sudo for tasks like installing software. In your Playbook or Command, you use the become keyword.
+
+In a command:
+
+Bash
+ansible webservers -i hosts.ini -m apt -a "name=nginx state=present" --become --ask-become-pass
+In a Playbook:
+
+YAML
+- name: Remote Configuration
+  hosts: webservers
+  become: yes  # This triggers sudo
+  tasks:
+    - name: Install Nginx
+      ansible.builtin.apt:
+        name: nginx
+        state: present
+5. Common Remote Variables
+Sometimes remote servers have unique setups. You can define these directly in your inventory:
+
+ansible_port: If SSH is not on the default port 22.
+
+ansible_ssh_private_key_file: If you use a specific .pem or .key file.
+
+ansible_python_interpreter: If the remote server has Python in a non-standard location (e.g., /usr/bin/python3).
+
+6. Security Best Practice: Ansible Vault
+Since you are dealing with remote servers, you might have sensitive data (API keys, passwords). Ansible Vault allows you to encrypt these values so they aren't stored in plain text in your playbooks.
+
+Encrypt a file:
+
+Bash
+ansible-vault encrypt credentials.yml
+54:39 Copying files on remote server
+In Ansible, moving files from your Control Node to your Managed Nodes is one of the most common tasks you'll perform. There are two primary modules used for this, depending on whether the file is "static" or "dynamic."1. The copy Module (Static Files)Use this when you have a file that is already complete and just needs to be placed on the remote server exactly as it is.YAML- name: Copy a simple configuration file
+  ansible.builtin.copy:
+    src: ./files/nginx.conf    # Path on your laptop/control node
+    dest: /etc/nginx/nginx.conf # Path on the remote server
+    owner: root
+    group: root
+    mode: '0644'               # Sets permissions
+    backup: yes                # Creates a backup of the old file if it changes
+2. The template Module (Dynamic Files)This is the "pro" way to handle files. It uses the Jinja2 engine to swap out placeholders (variables) with real data before copying the file.The Template (motd.j2):PlaintextWelcome to {{ ansible_hostname }}!
+This server is running {{ ansible_distribution }}.
+The Playbook Task:YAML- name: Create a dynamic Message of the Day
+  ansible.builtin.template:
+    src: motd.j2
+    dest: /etc/motd
+3. The fetch Module (Remote to Local)If you need to do the opposite—pull a log file or a backup from the remote server back to your control node—use fetch.YAML- name: Pull a log file from the remote server
+  ansible.builtin.fetch:
+    src: /var/log/syslog
+    dest: ./logs/
+    flat: yes # Prevents creating a full directory path of the remote server
+4. Key Parameters to RememberParameterPurposesrcThe source path. For copy, it's local. For fetch, it's remote.destThe destination path.modeEssential for security (e.g., '0600' for private keys, '0755' for scripts).content(Copy only) Allows you to provide the file text directly in the YAML instead of a separate file.forceIf yes (default), it overwrites the file. If no, it only copies if the file doesn't exist.5. Synchronizing FoldersIf you need to copy hundreds of files or entire directories, the copy module can be slow because it handles each file individually. Instead, use the synchronize module, which acts as a wrapper for rsync.YAML- name: Sync a large folder efficiently
+  ansible.posix.synchronize:
+    src: ./website_assets/
+    dest: /var/www/html/assets/
+Note: The synchronize module requires rsync to be installed on both the control node and the managed node.Which one should you use?Single file? Use copy.File with variables? Use template.Entire directory? Use synchronize.Grabbing data from a server? Use fetch.
+01:04:43 Backup of Files on remote server
+When it comes to backups on a remote server using Ansible, you generally have two goals: creating a backup on the remote machine itself before making changes, or pulling a backup off the remote machine to your Control Node (or a backup server).1. Creating an "In-Place" BackupMost Ansible modules that modify files (like copy, template, or lineinfile) have a built-in backup parameter. This is the easiest way to ensure you don't break a configuration irrevocably.YAML- name: Update Nginx config with a safety net
+  ansible.builtin.copy:
+    src: nginx.conf
+    dest: /etc/nginx/nginx.conf
+    backup: yes  # Creates a timestamped version: nginx.conf.2026-03-06@15:54~
+2. Archiving Files (Creating a .tar.gz)If you need to back up an entire directory (like /var/www/html or /etc/my-app) before a deployment, use the archive module. This bundles and compresses the files on the remote server.YAML- name: Compress web directory for backup
+  community.general.archive:
+    path: /var/www/html
+    dest: /backups/web_backup_{{ ansible_date_time.date }}.tar.gz
+    format: gz
+3. Pulling Backups to the Control NodeThe fetch module is the inverse of copy. It is used to grab a file from the remote server and store it locally on your management machine.YAML- name: Download the remote backup to local storage
+  ansible.builtin.fetch:
+    src: /backups/web_backup_2026-03-06.tar.gz
+    dest: ./local_backups/
+    flat: yes  # Keeps the filename simple instead of nesting by hostname
+4. Advanced: Using the synchronize ModuleFor large-scale backups (like an entire database dump folder), fetch is slow because it uses SFTP. The synchronize module uses rsync, which is much faster and supports "pull" mode.YAML- name: Efficiently sync remote backup folder to local
+  ansible.posix.synchronize:
+    mode: pull
+    src: /var/backups/
+    dest: ./mirror_backups/
+5. Summary of Backup StrategiesGoalModuleBest Use CasePrevent Overwritescopy / templateSetting backup: yes before a small edit.SnapshotsarchiveCreating a .zip or .tar.gz of a folder.Off-site StoragefetchMoving a single backup file to your laptop/cloud.Bulk MirroringsynchronizeKeeping a local copy of a large remote directory.Pro-Tip: The ansible_date_time FactTo make your backup filenames unique, always use Ansible's built-in time "facts." This prevents overwriting yesterday's backup with today's.{{ ansible_date_time.date }} (e.g., 2026-03-06){{ ansible_date_time.epoch }} (e.g., 1741276460)
+01:07:56 Create, Delete & Permission on Remote server
+01:18:21 Run script remotely
+01:28:17 Add Cron job remotely
+01:44:28 Create User on remote server
+01:52:12 Add or Update Password
+01:56:21 Find and Stop process
+02:02:06 Download files on Remote server
+02:06:48 Enable service in firewall
+02:13:41 Run tasks as SUDO user
+02:20:29 Ad Hoc task with Ansible
+02:31:32 Ansible tags
+02:35:46 Ansible Variables
+02:42:47 Ansible Handlers
+02:48:12 Ansible conditions
+02:54:45 Ansible loops
+03:01:52 Ansible ROLES
