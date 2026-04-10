@@ -1,0 +1,917 @@
+[ec2-user@ip-10-0-23-79 ~]$ curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+chmod 700 get_helm.sh
+./get_helm.sh
+[WARNING] Could not find git. It is required for plugin installation.
+Downloading https://get.helm.sh/helm-v3.20.1-linux-amd64.tar.gz
+Verifying checksum... Done.
+Preparing to install helm into /usr/local/bin
+helm installed into /usr/local/bin/helm
+[ec2-user@ip-10-0-23-79 ~]$ helm version
+version.BuildInfo{Version:"v3.20.1", GitCommit:"a2369ca71c0ef633bf6e4fccd66d634eb379b371", GitTreeState:"clean", GoVersion:"go1.25.8"}
+[ec2-user@ip-10-0-23-79 ~]$ helm repo add eks https://aws.github.io/eks-charts
+helm repo update
+"eks" has been added to your repositories
+Hang tight while we grab the latest from your chart repositories...
+...Successfully got an update from the "eks" chart repository
+Update Complete. ⎈Happy Helming!⎈
+[ec2-user@ip-10-0-23-79 ~]$ helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
+  -n kube-system \
+  --set clusterName=node-cluster \
+  --set serviceAccount.create=false \
+  --set serviceAccount.name=aws-load-balancer-controller \
+  --set region=ap-south-1 \
+  --set vpcId=vpc-0c41b24ea76614c60
+E0407 11:35:42.141562   13307 round_tripper.go:63] CancelRequest not implemented by *kube.RetryingRoundTripper
+NAME: aws-load-balancer-controller
+LAST DEPLOYED: Tue Apr  7 11:35:08 2026
+NAMESPACE: kube-system
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+NOTES:
+AWS Load Balancer controller installed!
+[ec2-user@ip-10-0-23-79 ~]$ kubectl get pods -n kube-system | grep aws-load-balancer
+aws-load-balancer-controller-5dbbc4887c-67gb8   0/1     ContainerCreating   0          28s
+aws-load-balancer-controller-5dbbc4887c-cx7fb   0/1     ContainerCreating   0          28s
+[ec2-user@ip-10-0-23-79 ~]$ kubectl get pods -n kube-system | grep aws-load-balancer
+aws-load-balancer-controller-5dbbc4887c-67gb8   1/1     Running   0          114s
+aws-load-balancer-controller-5dbbc4887c-cx7fb   1/1     Running   0          114s
+[ec2-user@ip-10-0-23-79 ~]$ kubectl get svc -n nodejs
+NAME            TYPE           CLUSTER-IP       EXTERNAL-IP   PORT(S)        AGE
+nginx-service   LoadBalancer   172.20.229.133   <pending>     80:31725/TCP   36m
+[ec2-user@ip-10-0-23-79 ~]$ kubectl get svc -n nodejs
+NAME            TYPE           CLUSTER-IP       EXTERNAL-IP   PORT(S)        AGE
+nginx-service   LoadBalancer   172.20.229.133   <pending>     80:31725/TCP   37m
+[ec2-user@ip-10-0-23-79 ~]$ kubectl get svc -n nodejs
+NAME            TYPE           CLUSTER-IP       EXTERNAL-IP   PORT(S)        AGE
+nginx-service   LoadBalancer   172.20.229.133   <pending>     80:31725/TCP   38m
+[ec2-user@ip-10-0-23-79 ~]$ kubectl logs -n kube-system -l app.kubernetes.io/name=aws-load-balancer-controller
+Error from server: Get "https://10.0.149.178:10250/containerLogs/kube-system/aws-load-balancer-controller-5dbbc4887c-67gb8/aws-load-balancer-controller?tailLines=10": dial tcp 10.0.149.178:10250: i/o timeout
+[ec2-user@ip-10-0-23-79 ~]$ kubectl logs -n kube-system -l app.kubernetes.io/name=aws-load-balancer-controller
+{"level":"info","ts":"2026-04-07T11:36:18Z","msg":"Starting EventSource","controller":"service","source":"kind source: *v1.Service"}
+{"level":"info","ts":"2026-04-07T11:36:18Z","msg":"Starting EventSource","controller":"targetGroupBinding","controllerGroup":"elbv2.k8s.aws","controllerKind":"TargetGroupBinding","source":"kind source: *v1beta1.TargetGroupBinding"}
+{"level":"info","ts":"2026-04-07T11:36:18Z","msg":"Starting EventSource","controller":"targetGroupBinding","controllerGroup":"elbv2.k8s.aws","controllerKind":"TargetGroupBinding","source":"kind source: *v1.Service"}
+{"level":"info","ts":"2026-04-07T11:36:18Z","msg":"Starting EventSource","controller":"targetGroupBinding","controllerGroup":"elbv2.k8s.aws","controllerKind":"TargetGroupBinding","source":"kind source: *v1.EndpointSlice"}
+{"level":"info","ts":"2026-04-07T11:36:18Z","msg":"Starting Controller","controller":"service"}
+{"level":"info","ts":"2026-04-07T11:36:18Z","msg":"Starting workers","controller":"service","worker count":3}
+{"level":"info","ts":"2026-04-07T11:36:18Z","msg":"Starting Controller","controller":"ingress"}
+{"level":"info","ts":"2026-04-07T11:36:18Z","msg":"Starting workers","controller":"ingress","worker count":3}
+{"level":"info","ts":"2026-04-07T11:36:18Z","msg":"Starting Controller","controller":"targetGroupBinding","controllerGroup":"elbv2.k8s.aws","controllerKind":"TargetGroupBinding"}
+{"level":"info","ts":"2026-04-07T11:36:18Z","msg":"Starting workers","controller":"targetGroupBinding","controllerGroup":"elbv2.k8s.aws","controllerKind":"TargetGroupBinding","worker count":3}
+{"level":"info","ts":"2026-04-07T11:36:18Z","logger":"setup","msg":"starting collect cache size"}
+{"level":"info","ts":"2026-04-07T11:36:18Z","logger":"setup","msg":"starting collect top talkers"}
+{"level":"info","ts":"2026-04-07T11:36:18Z","msg":"starting server","name":"health probe","addr":"[::]:61779"}
+{"level":"info","ts":"2026-04-07T11:36:18Z","logger":"controller-runtime.metrics","msg":"Starting metrics server"}
+{"level":"info","ts":"2026-04-07T11:36:18Z","logger":"controller-runtime.webhook","msg":"Starting webhook server"}
+{"level":"info","ts":"2026-04-07T11:36:18Z","logger":"controller-runtime.metrics","msg":"Serving metrics server","bindAddress":":8080","secure":false}
+{"level":"info","ts":"2026-04-07T11:36:18Z","logger":"controller-runtime.certwatcher","msg":"Updated current TLS certificate","cert":"/tmp/k8s-webhook-server/serving-certs/tls.crt","key":"/tmp/k8s-webhook-server/serving-certs/tls.key"}
+{"level":"info","ts":"2026-04-07T11:36:18Z","logger":"controller-runtime.webhook","msg":"Serving webhook server","host":"","port":9443}
+{"level":"info","ts":"2026-04-07T11:36:18Z","logger":"controller-runtime.certwatcher","msg":"Starting certificate poll+watcher","cert":"/tmp/k8s-webhook-server/serving-certs/tls.crt","key":"/tmp/k8s-webhook-server/serving-certs/tls.key","interval":10}
+{"level":"info","ts":"2026-04-07T11:36:19Z","msg":"Attempting to acquire leader lease...","lock":"kube-system/aws-load-balancer-controller-leader"}
+[ec2-user@ip-10-0-23-79 ~]$ kubectl get svc -n nodejs
+NAME            TYPE           CLUSTER-IP       EXTERNAL-IP   PORT(S)        AGE
+nginx-service   LoadBalancer   172.20.229.133   <pending>     80:31725/TCP   42m
+[ec2-user@ip-10-0-23-79 ~]$ kubectl get svc -n nodejs
+NAME            TYPE           CLUSTER-IP       EXTERNAL-IP   PORT(S)        AGE
+nginx-service   LoadBalancer   172.20.229.133   <pending>     80:31725/TCP   42m
+[ec2-user@ip-10-0-23-79 ~]$ kubectl get svc -n nodejs
+NAME            TYPE           CLUSTER-IP       EXTERNAL-IP   PORT(S)        AGE
+nginx-service   LoadBalancer   172.20.229.133   <pending>     80:31725/TCP   45m
+[ec2-user@ip-10-0-23-79 ~]$ kubectl get svc -n nodejs
+NAME            TYPE           CLUSTER-IP       EXTERNAL-IP   PORT(S)        AGE
+nginx-service   LoadBalancer   172.20.229.133   <pending>     80:31725/TCP   46m
+[ec2-user@ip-10-0-23-79 ~]$ kubectl logs -n kube-system -l app.kubernetes.io/name=aws-load-balancer-controller
+{"level":"info","ts":"2026-04-07T11:36:18Z","msg":"Starting EventSource","controller":"service","source":"kind source: *v1.Service"}
+{"level":"info","ts":"2026-04-07T11:36:18Z","msg":"Starting EventSource","controller":"targetGroupBinding","controllerGroup":"elbv2.k8s.aws","controllerKind":"TargetGroupBinding","source":"kind source: *v1beta1.TargetGroupBinding"}
+{"level":"info","ts":"2026-04-07T11:36:18Z","msg":"Starting EventSource","controller":"targetGroupBinding","controllerGroup":"elbv2.k8s.aws","controllerKind":"TargetGroupBinding","source":"kind source: *v1.Service"}
+{"level":"info","ts":"2026-04-07T11:36:18Z","msg":"Starting EventSource","controller":"targetGroupBinding","controllerGroup":"elbv2.k8s.aws","controllerKind":"TargetGroupBinding","source":"kind source: *v1.EndpointSlice"}
+{"level":"info","ts":"2026-04-07T11:36:18Z","msg":"Starting Controller","controller":"service"}
+{"level":"info","ts":"2026-04-07T11:36:18Z","msg":"Starting workers","controller":"service","worker count":3}
+{"level":"info","ts":"2026-04-07T11:36:18Z","msg":"Starting Controller","controller":"ingress"}
+{"level":"info","ts":"2026-04-07T11:36:18Z","msg":"Starting workers","controller":"ingress","worker count":3}
+{"level":"info","ts":"2026-04-07T11:36:18Z","msg":"Starting Controller","controller":"targetGroupBinding","controllerGroup":"elbv2.k8s.aws","controllerKind":"TargetGroupBinding"}
+{"level":"info","ts":"2026-04-07T11:36:18Z","msg":"Starting workers","controller":"targetGroupBinding","controllerGroup":"elbv2.k8s.aws","controllerKind":"TargetGroupBinding","worker count":3}
+{"level":"info","ts":"2026-04-07T11:36:18Z","logger":"setup","msg":"starting collect cache size"}
+{"level":"info","ts":"2026-04-07T11:36:18Z","logger":"setup","msg":"starting collect top talkers"}
+{"level":"info","ts":"2026-04-07T11:36:18Z","msg":"starting server","name":"health probe","addr":"[::]:61779"}
+{"level":"info","ts":"2026-04-07T11:36:18Z","logger":"controller-runtime.metrics","msg":"Starting metrics server"}
+{"level":"info","ts":"2026-04-07T11:36:18Z","logger":"controller-runtime.webhook","msg":"Starting webhook server"}
+{"level":"info","ts":"2026-04-07T11:36:18Z","logger":"controller-runtime.metrics","msg":"Serving metrics server","bindAddress":":8080","secure":false}
+{"level":"info","ts":"2026-04-07T11:36:18Z","logger":"controller-runtime.certwatcher","msg":"Updated current TLS certificate","cert":"/tmp/k8s-webhook-server/serving-certs/tls.crt","key":"/tmp/k8s-webhook-server/serving-certs/tls.key"}
+{"level":"info","ts":"2026-04-07T11:36:18Z","logger":"controller-runtime.webhook","msg":"Serving webhook server","host":"","port":9443}
+{"level":"info","ts":"2026-04-07T11:36:18Z","logger":"controller-runtime.certwatcher","msg":"Starting certificate poll+watcher","cert":"/tmp/k8s-webhook-server/serving-certs/tls.crt","key":"/tmp/k8s-webhook-server/serving-certs/tls.key","interval":10}
+{"level":"info","ts":"2026-04-07T11:36:19Z","msg":"Attempting to acquire leader lease...","lock":"kube-system/aws-load-balancer-controller-leader"}
+[ec2-user@ip-10-0-23-79 ~]$ kubectl get svc -n nodejs
+NAME            TYPE           CLUSTER-IP       EXTERNAL-IP   PORT(S)        AGE
+nginx-service   LoadBalancer   172.20.229.133   <pending>     80:31725/TCP   48m
+[ec2-user@ip-10-0-23-79 ~]$ kubectl get svc -n nodejs
+NAME            TYPE           CLUSTER-IP       EXTERNAL-IP   PORT(S)        AGE
+nginx-service   LoadBalancer   172.20.229.133   <pending>     80:31725/TCP   50m
+[ec2-user@ip-10-0-23-79 ~]$ kubectl get svc -n nodejs
+NAME            TYPE           CLUSTER-IP       EXTERNAL-IP   PORT(S)        AGE
+nginx-service   LoadBalancer   172.20.229.133   <pending>     80:31725/TCP   51m
+[ec2-user@ip-10-0-23-79 ~]$ kubectl logs -n kube-system -l app.kubernetes.io/name=aws-load-balancer-controller
+{"level":"info","ts":"2026-04-07T11:36:18Z","msg":"Starting EventSource","controller":"service","source":"kind source: *v1.Service"}
+{"level":"info","ts":"2026-04-07T11:36:18Z","msg":"Starting EventSource","controller":"targetGroupBinding","controllerGroup":"elbv2.k8s.aws","controllerKind":"TargetGroupBinding","source":"kind source: *v1beta1.TargetGroupBinding"}
+{"level":"info","ts":"2026-04-07T11:36:18Z","msg":"Starting EventSource","controller":"targetGroupBinding","controllerGroup":"elbv2.k8s.aws","controllerKind":"TargetGroupBinding","source":"kind source: *v1.Service"}
+{"level":"info","ts":"2026-04-07T11:36:18Z","msg":"Starting EventSource","controller":"targetGroupBinding","controllerGroup":"elbv2.k8s.aws","controllerKind":"TargetGroupBinding","source":"kind source: *v1.EndpointSlice"}
+{"level":"info","ts":"2026-04-07T11:36:18Z","msg":"Starting Controller","controller":"service"}
+{"level":"info","ts":"2026-04-07T11:36:18Z","msg":"Starting workers","controller":"service","worker count":3}
+{"level":"info","ts":"2026-04-07T11:36:18Z","msg":"Starting Controller","controller":"ingress"}
+{"level":"info","ts":"2026-04-07T11:36:18Z","msg":"Starting workers","controller":"ingress","worker count":3}
+{"level":"info","ts":"2026-04-07T11:36:18Z","msg":"Starting Controller","controller":"targetGroupBinding","controllerGroup":"elbv2.k8s.aws","controllerKind":"TargetGroupBinding"}
+{"level":"info","ts":"2026-04-07T11:36:18Z","msg":"Starting workers","controller":"targetGroupBinding","controllerGroup":"elbv2.k8s.aws","controllerKind":"TargetGroupBinding","worker count":3}
+{"level":"info","ts":"2026-04-07T11:36:18Z","logger":"setup","msg":"starting collect cache size"}
+{"level":"info","ts":"2026-04-07T11:36:18Z","logger":"setup","msg":"starting collect top talkers"}
+{"level":"info","ts":"2026-04-07T11:36:18Z","msg":"starting server","name":"health probe","addr":"[::]:61779"}
+{"level":"info","ts":"2026-04-07T11:36:18Z","logger":"controller-runtime.metrics","msg":"Starting metrics server"}
+{"level":"info","ts":"2026-04-07T11:36:18Z","logger":"controller-runtime.webhook","msg":"Starting webhook server"}
+{"level":"info","ts":"2026-04-07T11:36:18Z","logger":"controller-runtime.metrics","msg":"Serving metrics server","bindAddress":":8080","secure":false}
+{"level":"info","ts":"2026-04-07T11:36:18Z","logger":"controller-runtime.certwatcher","msg":"Updated current TLS certificate","cert":"/tmp/k8s-webhook-server/serving-certs/tls.crt","key":"/tmp/k8s-webhook-server/serving-certs/tls.key"}
+{"level":"info","ts":"2026-04-07T11:36:18Z","logger":"controller-runtime.webhook","msg":"Serving webhook server","host":"","port":9443}
+{"level":"info","ts":"2026-04-07T11:36:18Z","logger":"controller-runtime.certwatcher","msg":"Starting certificate poll+watcher","cert":"/tmp/k8s-webhook-server/serving-certs/tls.crt","key":"/tmp/k8s-webhook-server/serving-certs/tls.key","interval":10}
+{"level":"info","ts":"2026-04-07T11:36:19Z","msg":"Attempting to acquire leader lease...","lock":"kube-system/aws-load-balancer-controller-leader"}
+[ec2-user@ip-10-0-23-79 ~]$ kubectl get pods -n npdejs
+No resources found in npdejs namespace.
+[ec2-user@ip-10-0-23-79 ~]$ kubectl get pods -n nodejs
+NAME                                READY   STATUS    RESTARTS   AGE
+nginx-deployment-59f86b59ff-2cm6z   1/1     Running   0          6h15m
+nginx-deployment-59f86b59ff-xs9bs   1/1     Running   0          6h15m
+[ec2-user@ip-10-0-23-79 ~]$ kubectl describe pod nginx-deployment-59f86b59ff-2cm6z
+Error from server (NotFound): pods "nginx-deployment-59f86b59ff-2cm6z" not found
+[ec2-user@ip-10-0-23-79 ~]$ kubectl describe pod nginx-deployment-59f86b59ff-2cm6z -n nodejs
+Name:                 nginx-deployment-59f86b59ff-2cm6z
+Namespace:            nodejs
+Priority:             2000001000
+Priority Class Name:  system-node-critical
+Service Account:      default
+Node:                 fargate-ip-10-0-129-20.ap-south-1.compute.internal/10.0.129.20
+Start Time:           Tue, 07 Apr 2026 05:39:18 +0000
+Labels:               app=nginx
+                      eks.amazonaws.com/fargate-profile=node
+                      pod-template-hash=59f86b59ff
+                      topology.kubernetes.io/region=ap-south-1
+                      topology.kubernetes.io/zone=ap-south-1a
+Annotations:          CapacityProvisioned: 0.25vCPU 0.5GB
+                      Logging: LoggingDisabled: LOGGING_CONFIGMAP_NOT_FOUND
+Status:               Running
+IP:                   10.0.129.20
+IPs:
+  IP:           10.0.129.20
+Controlled By:  ReplicaSet/nginx-deployment-59f86b59ff
+Containers:
+  nginx:
+    Container ID:   containerd://2e13a99d481ccbe1b0181261e8b0dad4c6cf919073d04b2371401e5e235b929d
+    Image:          nginx:latest
+    Image ID:       docker.io/library/nginx@sha256:381b45aeb56e1ab20ed5ec5fe6483f44050d9ce1a837575f0d1333a6c6e4e251
+    Port:           80/TCP
+    Host Port:      0/TCP
+    State:          Running
+      Started:      Tue, 07 Apr 2026 05:39:27 +0000
+    Ready:          True
+    Restart Count:  0
+    Environment:    <none>
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-m2lw7 (ro)
+Conditions:
+  Type                        Status
+  PodReadyToStartContainers   True 
+  Initialized                 True 
+  Ready                       True 
+  ContainersReady             True 
+  PodScheduled                True 
+Volumes:
+  kube-api-access-m2lw7:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    ConfigMapOptional:       <nil>
+    DownwardAPI:             true
+QoS Class:                   BestEffort
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:                      <none>
+[ec2-user@ip-10-0-23-79 ~]$ kubectl get svc -n nodejs
+NAME            TYPE           CLUSTER-IP       EXTERNAL-IP   PORT(S)        AGE
+nginx-service   LoadBalancer   172.20.229.133   <pending>     80:31725/TCP   54m
+[ec2-user@ip-10-0-23-79 ~]$ kubectl describe svc nginx-service -n nodejs
+Warning: v1 Endpoints is deprecated in v1.33+; use discovery.k8s.io/v1 EndpointSlice
+Name:                     nginx-service
+Namespace:                nodejs
+Labels:                   <none>
+Annotations:              service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: instance
+                          service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+                          service.beta.kubernetes.io/aws-load-balancer-type: external
+Selector:                 app=nginx
+Type:                     LoadBalancer
+IP Family Policy:         SingleStack
+IP Families:              IPv4
+IP:                       172.20.229.133
+IPs:                      172.20.229.133
+Port:                     <unset>  80/TCP
+TargetPort:               80/TCP
+NodePort:                 <unset>  31725/TCP
+Endpoints:                10.0.129.20:80,10.0.140.57:80
+Session Affinity:         None
+External Traffic Policy:  Cluster
+Events:
+  Type     Reason            Age                  From     Message
+  ----     ------            ----                 ----     -------
+  Warning  FailedBuildModel  9m20s (x4 over 54m)  service  Failed build model due to unable to resolve at least one subnet (0 match VPC and tags: [kubernetes.io/role/elb])
+[ec2-user@ip-10-0-23-79 ~]$ ^C
+[ec2-user@ip-10-0-23-79 ~]$ kubectl logs -n kube-system -l app.kubernetes.io/name=aws-load-balancer-controller --tail=200 | grep -i "subnets"
+[ec2-user@ip-10-0-23-79 ~]$ kubectl delete svc nginx-service -n nodejs
+service "nginx-service" deleted
+[ec2-user@ip-10-0-23-79 ~]$ kubectl apply -f service.yaml
+Error from server (InternalError): error when creating "service.yaml": Internal error occurred: failed calling webhook "mservice.elbv2.k8s.aws": failed to call webhook: Post "https://aws-load-balancer-webhook-service.kube-system.svc:443/mutate-v1-service?timeout=10s": context deadline exceeded
+[ec2-user@ip-10-0-23-79 ~]$ kubectl apply -f service.yaml
+Error from server (InternalError): error when creating "service.yaml": Internal error occurred: failed calling webhook "mservice.elbv2.k8s.aws": failed to call webhook: Post "https://aws-load-balancer-webhook-service.kube-system.svc:443/mutate-v1-service?timeout=10s": context deadline exceeded
+[ec2-user@ip-10-0-23-79 ~]$ kubectl get svc -n kube-system aws-load-balancer-webhook-service
+NAME                                TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)   AGE
+aws-load-balancer-webhook-service   ClusterIP   172.20.182.173   <none>        443/TCP   28m
+[ec2-user@ip-10-0-23-79 ~]$ kubectl get endpoints -n kube-system aws-load-balancer-webhook-service
+Warning: v1 Endpoints is deprecated in v1.33+; use discovery.k8s.io/v1 EndpointSlice
+NAME                                ENDPOINTS                           AGE
+aws-load-balancer-webhook-service   10.0.157.80:9443,10.0.157.81:9443   28m
+[ec2-user@ip-10-0-23-79 ~]$ ^C
+[ec2-user@ip-10-0-23-79 ~]$ kubectl apply -f service.yaml
+service/nginx-service created
+[ec2-user@ip-10-0-23-79 ~]$ kubectl get svc -n nodejs
+NAME            TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)        AGE
+nginx-service   LoadBalancer   172.20.20.128   <pending>     80:31719/TCP   24s
+[ec2-user@ip-10-0-23-79 ~]$ kubectl get svc -n nodejs
+NAME            TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)        AGE
+nginx-service   LoadBalancer   172.20.20.128   <pending>     80:31719/TCP   90s
+[ec2-user@ip-10-0-23-79 ~]$ kubectl get svc -n nodejs
+NAME            TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)        AGE
+nginx-service   LoadBalancer   172.20.20.128   <pending>     80:31719/TCP   101s
+[ec2-user@ip-10-0-23-79 ~]$ kubectl get svc -n nodejs
+NAME            TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)        AGE
+nginx-service   LoadBalancer   172.20.20.128   <pending>     80:31719/TCP   3m4s
+[ec2-user@ip-10-0-23-79 ~]$ kubectl describe svc nginx-service -n nodejs
+Warning: v1 Endpoints is deprecated in v1.33+; use discovery.k8s.io/v1 EndpointSlice
+Name:                     nginx-service
+Namespace:                nodejs
+Labels:                   <none>
+Annotations:              service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: instance
+                          service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+                          service.beta.kubernetes.io/aws-load-balancer-type: external
+Selector:                 app=nginx
+Type:                     LoadBalancer
+IP Family Policy:         SingleStack
+IP Families:              IPv4
+IP:                       172.20.20.128
+IPs:                      172.20.20.128
+Port:                     <unset>  80/TCP
+TargetPort:               80/TCP
+NodePort:                 <unset>  31719/TCP
+Endpoints:                10.0.129.20:80,10.0.140.57:80
+Session Affinity:         None
+External Traffic Policy:  Cluster
+Events:
+  Type     Reason            Age                  From     Message
+  ----     ------            ----                 ----     -------
+  Warning  FailedBuildModel  3m20s                service  Failed build model due to failed to list subnets by reachability: operation error EC2: DescribeRouteTables, https response error StatusCode: 403, RequestID: 35d07603-5a3f-4a4f-819e-594db686f051, api error UnauthorizedOperation: You are not authorized to perform this operation. User: arn:aws:sts::723738378076:assumed-role/AmazonEKSLoadBalancerControllerRole/1775563540564742524 is not authorized to perform: ec2:DescribeRouteTables because no identity-based policy allows the ec2:DescribeRouteTables action
+  Warning  FailedBuildModel  3m19s                service  Failed build model due to failed to list subnets by reachability: operation error EC2: DescribeRouteTables, https response error StatusCode: 403, RequestID: 1c5545ae-dc6a-4ad6-b813-b712e0c5a9d0, api error UnauthorizedOperation: You are not authorized to perform this operation. User: arn:aws:sts::723738378076:assumed-role/AmazonEKSLoadBalancerControllerRole/1775563540564742524 is not authorized to perform: ec2:DescribeRouteTables because no identity-based policy allows the ec2:DescribeRouteTables action
+  Warning  FailedBuildModel  3m19s                service  Failed build model due to failed to list subnets by reachability: operation error EC2: DescribeRouteTables, https response error StatusCode: 403, RequestID: 2aa4f525-6b3f-46c4-b6fc-50c99ceaeb11, api error UnauthorizedOperation: You are not authorized to perform this operation. User: arn:aws:sts::723738378076:assumed-role/AmazonEKSLoadBalancerControllerRole/1775563540564742524 is not authorized to perform: ec2:DescribeRouteTables because no identity-based policy allows the ec2:DescribeRouteTables action
+  Warning  FailedBuildModel  3m19s                service  Failed build model due to failed to list subnets by reachability: operation error EC2: DescribeRouteTables, https response error StatusCode: 403, RequestID: 4c84b356-3921-43e7-a6c4-e1b5e2f1b69e, api error UnauthorizedOperation: You are not authorized to perform this operation. User: arn:aws:sts::723738378076:assumed-role/AmazonEKSLoadBalancerControllerRole/1775563540564742524 is not authorized to perform: ec2:DescribeRouteTables because no identity-based policy allows the ec2:DescribeRouteTables action
+  Warning  FailedBuildModel  3m19s                service  Failed build model due to failed to list subnets by reachability: operation error EC2: DescribeRouteTables, https response error StatusCode: 403, RequestID: deada57a-9cb9-4b63-8182-6360f93ad6b6, api error UnauthorizedOperation: You are not authorized to perform this operation. User: arn:aws:sts::723738378076:assumed-role/AmazonEKSLoadBalancerControllerRole/1775563540564742524 is not authorized to perform: ec2:DescribeRouteTables because no identity-based policy allows the ec2:DescribeRouteTables action
+  Warning  FailedBuildModel  3m19s                service  Failed build model due to failed to list subnets by reachability: operation error EC2: DescribeRouteTables, https response error StatusCode: 403, RequestID: 40359b8d-7762-4f27-b7ed-acb30d5b9bd0, api error UnauthorizedOperation: You are not authorized to perform this operation. User: arn:aws:sts::723738378076:assumed-role/AmazonEKSLoadBalancerControllerRole/1775563540564742524 is not authorized to perform: ec2:DescribeRouteTables because no identity-based policy allows the ec2:DescribeRouteTables action
+  Warning  FailedBuildModel  3m18s                service  Failed build model due to failed to list subnets by reachability: operation error EC2: DescribeRouteTables, https response error StatusCode: 403, RequestID: 098a0be6-2ffa-4a8b-a963-6bb5ee9b6a52, api error UnauthorizedOperation: You are not authorized to perform this operation. User: arn:aws:sts::723738378076:assumed-role/AmazonEKSLoadBalancerControllerRole/1775563540564742524 is not authorized to perform: ec2:DescribeRouteTables because no identity-based policy allows the ec2:DescribeRouteTables action
+  Warning  FailedBuildModel  3m18s                service  Failed build model due to failed to list subnets by reachability: operation error EC2: DescribeRouteTables, https response error StatusCode: 403, RequestID: ad44cec3-2244-4eae-acbe-25addcb5fc10, api error UnauthorizedOperation: You are not authorized to perform this operation. User: arn:aws:sts::723738378076:assumed-role/AmazonEKSLoadBalancerControllerRole/1775563540564742524 is not authorized to perform: ec2:DescribeRouteTables because no identity-based policy allows the ec2:DescribeRouteTables action
+  Warning  FailedBuildModel  3m17s                service  Failed build model due to failed to list subnets by reachability: operation error EC2: DescribeRouteTables, https response error StatusCode: 403, RequestID: 64369bd1-e14c-4c11-93bf-cff4dfc244a4, api error UnauthorizedOperation: You are not authorized to perform this operation. User: arn:aws:sts::723738378076:assumed-role/AmazonEKSLoadBalancerControllerRole/1775563540564742524 is not authorized to perform: ec2:DescribeRouteTables because no identity-based policy allows the ec2:DescribeRouteTables action
+  Warning  FailedBuildModel  34s (x7 over 3m16s)  service  (combined from similar events): Failed build model due to failed to list subnets by reachability: operation error EC2: DescribeRouteTables, https response error StatusCode: 403, RequestID: 079e7ea5-8def-443f-a046-3f5b9ed18c5f, api error UnauthorizedOperation: You are not authorized to perform this operation. User: arn:aws:sts::723738378076:assumed-role/AmazonEKSLoadBalancerControllerRole/1775563540564742524 is not authorized to perform: ec2:DescribeRouteTables because no identity-based policy allows the ec2:DescribeRouteTables action
+[ec2-user@ip-10-0-23-79 ~]$ curl -O https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/v2.7.2/docs/install/iam_policy.json
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100  8446 100  8446   0     0 32933     0  --:--:-- --:--:-- --:--:-- 32992
+[ec2-user@ip-10-0-23-79 ~]$ # This updates the policy content in AWS to the correct version
+aws iam create-policy-version \
+    --policy-arn arn:aws:iam::723738378076:policy/AWSLoadBalancerControllerIAMPolicy \
+    --policy-document file://iam_policy.json \
+    --set-as-default
+{
+    "PolicyVersion": {
+        "VersionId": "v2",
+        "IsDefaultVersion": true,
+        "CreateDate": "2026-04-07T12:10:38+00:00"
+    }
+}
+[ec2-user@ip-10-0-23-79 ~]$ aws iam attach-role-policy \
+    --role-name AmazonEKSLoadBalancerControllerRole \
+    --policy-arn arn:aws:iam::723738378076:policy/AWSLoadBalancerControllerIAMPolicy
+[ec2-user@ip-10-0-23-79 ~]$ kubectl rollout restart deployment aws-load-balancer-controller -n kube-system
+deployment.apps/aws-load-balancer-controller restarted
+[ec2-user@ip-10-0-23-79 ~]$ kubectl get svc -n nodejs
+NAME            TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)        AGE
+nginx-service   LoadBalancer   172.20.20.128   <pending>     80:31719/TCP   6m2s
+[ec2-user@ip-10-0-23-79 ~]$ kubectl get svc -n nodejs
+NAME            TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)        AGE
+nginx-service   LoadBalancer   172.20.20.128   <pending>     80:31719/TCP   6m35s
+[ec2-user@ip-10-0-23-79 ~]$ kubectl get svc -n nodejs
+NAME            TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)        AGE
+nginx-service   LoadBalancer   172.20.20.128   <pending>     80:31719/TCP   10m
+[ec2-user@ip-10-0-23-79 ~]$ kubectl describe svc nginx-service -n nodejs
+Warning: v1 Endpoints is deprecated in v1.33+; use discovery.k8s.io/v1 EndpointSlice
+Name:                     nginx-service
+Namespace:                nodejs
+Labels:                   <none>
+Annotations:              service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: instance
+                          service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+                          service.beta.kubernetes.io/aws-load-balancer-type: external
+Selector:                 app=nginx
+Type:                     LoadBalancer
+IP Family Policy:         SingleStack
+IP Families:              IPv4
+IP:                       172.20.20.128
+IPs:                      172.20.20.128
+Port:                     <unset>  80/TCP
+TargetPort:               80/TCP
+NodePort:                 <unset>  31719/TCP
+Endpoints:                10.0.129.20:80,10.0.140.57:80
+Session Affinity:         None
+External Traffic Policy:  Cluster
+Events:
+  Type     Reason            Age                  From     Message
+  ----     ------            ----                 ----     -------
+  Warning  FailedBuildModel  10m                  service  Failed build model due to failed to list subnets by reachability: operation error EC2: DescribeRouteTables, https response error StatusCode: 403, RequestID: 35d07603-5a3f-4a4f-819e-594db686f051, api error UnauthorizedOperation: You are not authorized to perform this operation. User: arn:aws:sts::723738378076:assumed-role/AmazonEKSLoadBalancerControllerRole/1775563540564742524 is not authorized to perform: ec2:DescribeRouteTables because no identity-based policy allows the ec2:DescribeRouteTables action
+  Warning  FailedBuildModel  10m                  service  Failed build model due to failed to list subnets by reachability: operation error EC2: DescribeRouteTables, https response error StatusCode: 403, RequestID: 1c5545ae-dc6a-4ad6-b813-b712e0c5a9d0, api error UnauthorizedOperation: You are not authorized to perform this operation. User: arn:aws:sts::723738378076:assumed-role/AmazonEKSLoadBalancerControllerRole/1775563540564742524 is not authorized to perform: ec2:DescribeRouteTables because no identity-based policy allows the ec2:DescribeRouteTables action
+  Warning  FailedBuildModel  10m                  service  Failed build model due to failed to list subnets by reachability: operation error EC2: DescribeRouteTables, https response error StatusCode: 403, RequestID: 2aa4f525-6b3f-46c4-b6fc-50c99ceaeb11, api error UnauthorizedOperation: You are not authorized to perform this operation. User: arn:aws:sts::723738378076:assumed-role/AmazonEKSLoadBalancerControllerRole/1775563540564742524 is not authorized to perform: ec2:DescribeRouteTables because no identity-based policy allows the ec2:DescribeRouteTables action
+  Warning  FailedBuildModel  10m                  service  Failed build model due to failed to list subnets by reachability: operation error EC2: DescribeRouteTables, https response error StatusCode: 403, RequestID: 4c84b356-3921-43e7-a6c4-e1b5e2f1b69e, api error UnauthorizedOperation: You are not authorized to perform this operation. User: arn:aws:sts::723738378076:assumed-role/AmazonEKSLoadBalancerControllerRole/1775563540564742524 is not authorized to perform: ec2:DescribeRouteTables because no identity-based policy allows the ec2:DescribeRouteTables action
+  Warning  FailedBuildModel  10m                  service  Failed build model due to failed to list subnets by reachability: operation error EC2: DescribeRouteTables, https response error StatusCode: 403, RequestID: deada57a-9cb9-4b63-8182-6360f93ad6b6, api error UnauthorizedOperation: You are not authorized to perform this operation. User: arn:aws:sts::723738378076:assumed-role/AmazonEKSLoadBalancerControllerRole/1775563540564742524 is not authorized to perform: ec2:DescribeRouteTables because no identity-based policy allows the ec2:DescribeRouteTables action
+  Warning  FailedBuildModel  10m                  service  Failed build model due to failed to list subnets by reachability: operation error EC2: DescribeRouteTables, https response error StatusCode: 403, RequestID: 40359b8d-7762-4f27-b7ed-acb30d5b9bd0, api error UnauthorizedOperation: You are not authorized to perform this operation. User: arn:aws:sts::723738378076:assumed-role/AmazonEKSLoadBalancerControllerRole/1775563540564742524 is not authorized to perform: ec2:DescribeRouteTables because no identity-based policy allows the ec2:DescribeRouteTables action
+  Warning  FailedBuildModel  10m                  service  Failed build model due to failed to list subnets by reachability: operation error EC2: DescribeRouteTables, https response error StatusCode: 403, RequestID: 098a0be6-2ffa-4a8b-a963-6bb5ee9b6a52, api error UnauthorizedOperation: You are not authorized to perform this operation. User: arn:aws:sts::723738378076:assumed-role/AmazonEKSLoadBalancerControllerRole/1775563540564742524 is not authorized to perform: ec2:DescribeRouteTables because no identity-based policy allows the ec2:DescribeRouteTables action
+  Warning  FailedBuildModel  10m                  service  Failed build model due to failed to list subnets by reachability: operation error EC2: DescribeRouteTables, https response error StatusCode: 403, RequestID: ad44cec3-2244-4eae-acbe-25addcb5fc10, api error UnauthorizedOperation: You are not authorized to perform this operation. User: arn:aws:sts::723738378076:assumed-role/AmazonEKSLoadBalancerControllerRole/1775563540564742524 is not authorized to perform: ec2:DescribeRouteTables because no identity-based policy allows the ec2:DescribeRouteTables action
+  Warning  FailedBuildModel  10m                  service  Failed build model due to failed to list subnets by reachability: operation error EC2: DescribeRouteTables, https response error StatusCode: 403, RequestID: 64369bd1-e14c-4c11-93bf-cff4dfc244a4, api error UnauthorizedOperation: You are not authorized to perform this operation. User: arn:aws:sts::723738378076:assumed-role/AmazonEKSLoadBalancerControllerRole/1775563540564742524 is not authorized to perform: ec2:DescribeRouteTables because no identity-based policy allows the ec2:DescribeRouteTables action
+  Warning  FailedBuildModel  5m17s (x8 over 10m)  service  (combined from similar events): Failed build model due to failed to list subnets by reachability: operation error EC2: DescribeRouteTables, https response error StatusCode: 403, RequestID: a0df6c48-ed0a-42cd-b973-564f237c12a0, api error UnauthorizedOperation: You are not authorized to perform this operation. User: arn:aws:sts::723738378076:assumed-role/AmazonEKSLoadBalancerControllerRole/1775563540564742524 is not authorized to perform: ec2:DescribeRouteTables because no identity-based policy allows the ec2:DescribeRouteTables action
+  Warning  FailedBuildModel  4m10s                service  Failed build model due to failed to list subnets by reachability: operation error EC2: DescribeRouteTables, https response error StatusCode: 403, RequestID: 25e03066-7fd9-47c8-a195-c6ddc405c68a, api error UnauthorizedOperation: You are not authorized to perform this operation. User: arn:aws:sts::723738378076:assumed-role/AmazonEKSLoadBalancerControllerRole/1775563937329781203 is not authorized to perform: ec2:DescribeRouteTables because no identity-based policy allows the ec2:DescribeRouteTables action
+  Warning  FailedBuildModel  4m10s                service  Failed build model due to failed to list subnets by reachability: operation error EC2: DescribeRouteTables, https response error StatusCode: 403, RequestID: 4f955826-4481-4abb-b04b-7c97e9780444, api error UnauthorizedOperation: You are not authorized to perform this operation. User: arn:aws:sts::723738378076:assumed-role/AmazonEKSLoadBalancerControllerRole/1775563937329781203 is not authorized to perform: ec2:DescribeRouteTables because no identity-based policy allows the ec2:DescribeRouteTables action
+  Warning  FailedBuildModel  4m10s                service  Failed build model due to failed to list subnets by reachability: operation error EC2: DescribeRouteTables, https response error StatusCode: 403, RequestID: 2f6efcab-3248-4693-9c49-5c0b9a1d6c8c, api error UnauthorizedOperation: You are not authorized to perform this operation. User: arn:aws:sts::723738378076:assumed-role/AmazonEKSLoadBalancerControllerRole/1775563937329781203 is not authorized to perform: ec2:DescribeRouteTables because no identity-based policy allows the ec2:DescribeRouteTables action
+  Warning  FailedBuildModel  4m9s                 service  Failed build model due to failed to list subnets by reachability: operation error EC2: DescribeRouteTables, https response error StatusCode: 403, RequestID: db7b2607-7e47-4b20-981c-ea3cc59ad537, api error UnauthorizedOperation: You are not authorized to perform this operation. User: arn:aws:sts::723738378076:assumed-role/AmazonEKSLoadBalancerControllerRole/1775563937329781203 is not authorized to perform: ec2:DescribeRouteTables because no identity-based policy allows the ec2:DescribeRouteTables action
+  Warning  FailedBuildModel  4m9s                 service  Failed build model due to failed to list subnets by reachability: operation error EC2: DescribeRouteTables, https response error StatusCode: 403, RequestID: 98b1ca91-acee-49b7-99a4-6b480f640165, api error UnauthorizedOperation: You are not authorized to perform this operation. User: arn:aws:sts::723738378076:assumed-role/AmazonEKSLoadBalancerControllerRole/1775563937329781203 is not authorized to perform: ec2:DescribeRouteTables because no identity-based policy allows the ec2:DescribeRouteTables action
+  Warning  FailedBuildModel  4m9s                 service  Failed build model due to failed to list subnets by reachability: operation error EC2: DescribeRouteTables, https response error StatusCode: 403, RequestID: 2d9d0f62-89ca-40ce-9d3f-eb2fce1ffb70, api error UnauthorizedOperation: You are not authorized to perform this operation. User: arn:aws:sts::723738378076:assumed-role/AmazonEKSLoadBalancerControllerRole/1775563937329781203 is not authorized to perform: ec2:DescribeRouteTables because no identity-based policy allows the ec2:DescribeRouteTables action
+  Warning  FailedBuildModel  4m9s                 service  Failed build model due to failed to list subnets by reachability: operation error EC2: DescribeRouteTables, https response error StatusCode: 403, RequestID: 91a9dc59-ae60-4aa9-89da-571dd59860bd, api error UnauthorizedOperation: You are not authorized to perform this operation. User: arn:aws:sts::723738378076:assumed-role/AmazonEKSLoadBalancerControllerRole/1775563937329781203 is not authorized to perform: ec2:DescribeRouteTables because no identity-based policy allows the ec2:DescribeRouteTables action
+  Warning  FailedBuildModel  4m8s                 service  Failed build model due to failed to list subnets by reachability: operation error EC2: DescribeRouteTables, https response error StatusCode: 403, RequestID: 9af64393-5ae5-40f2-9b3b-7456608af9b8, api error UnauthorizedOperation: You are not authorized to perform this operation. User: arn:aws:sts::723738378076:assumed-role/AmazonEKSLoadBalancerControllerRole/1775563937329781203 is not authorized to perform: ec2:DescribeRouteTables because no identity-based policy allows the ec2:DescribeRouteTables action
+  Warning  FailedBuildModel  4m8s                 service  Failed build model due to failed to list subnets by reachability: operation error EC2: DescribeRouteTables, https response error StatusCode: 403, RequestID: f7d4ace5-9d02-456e-96fc-f6c1053017a7, api error UnauthorizedOperation: You are not authorized to perform this operation. User: arn:aws:sts::723738378076:assumed-role/AmazonEKSLoadBalancerControllerRole/1775563937329781203 is not authorized to perform: ec2:DescribeRouteTables because no identity-based policy allows the ec2:DescribeRouteTables action
+  Warning  FailedBuildModel  84s (x7 over 4m6s)   service  (combined from similar events): Failed build model due to failed to list subnets by reachability: operation error EC2: DescribeRouteTables, https response error StatusCode: 403, RequestID: 62453d13-e37a-4f53-8702-a218341b98a9, api error UnauthorizedOperation: You are not authorized to perform this operation. User: arn:aws:sts::723738378076:assumed-role/AmazonEKSLoadBalancerControllerRole/1775563937329781203 is not authorized to perform: ec2:DescribeRouteTables because no identity-based policy allows the ec2:DescribeRouteTables action
+[ec2-user@ip-10-0-23-79 ~]$ aws iam get-policy-version \
+    --policy-arn arn:aws:iam::723738378076:policy/AWSLoadBalancerControllerIAMPolicy \
+    --version-id $(aws iam get-policy --policy-arn arn:aws:iam::723738378076:policy/AWSLoadBalancerControllerIAMPolicy --query 'Policy.DefaultVersionId' --output text)
+{
+    "PolicyVersion": {
+        "Document": {
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Effect": "Allow",
+                    "Action": [
+                        "iam:CreateServiceLinkedRole"
+                    ],
+                    "Resource": "*",
+                    "Condition": {
+                        "StringEquals": {
+                            "iam:AWSServiceName": "elasticloadbalancing.amazonaws.com"
+                        }
+                    }
+                },
+                {
+                    "Effect": "Allow",
+                    "Action": [
+                        "ec2:DescribeAccountAttributes",
+                        "ec2:DescribeAddresses",
+                        "ec2:DescribeAvailabilityZones",
+                        "ec2:DescribeInternetGateways",
+                        "ec2:DescribeVpcs",
+                        "ec2:DescribeVpcPeeringConnections",
+                        "ec2:DescribeSubnets",
+                        "ec2:DescribeSecurityGroups",
+                        "ec2:DescribeInstances",
+                        "ec2:DescribeNetworkInterfaces",
+                        "ec2:DescribeTags",
+                        "ec2:GetCoipPoolUsage",
+                        "ec2:DescribeCoipPools",
+                        "elasticloadbalancing:DescribeLoadBalancers",
+                        "elasticloadbalancing:DescribeLoadBalancerAttributes",
+                        "elasticloadbalancing:DescribeListeners",
+                        "elasticloadbalancing:DescribeListenerCertificates",
+                        "elasticloadbalancing:DescribeSSLPolicies",
+                        "elasticloadbalancing:DescribeRules",
+                        "elasticloadbalancing:DescribeTargetGroups",
+                        "elasticloadbalancing:DescribeTargetGroupAttributes",
+                        "elasticloadbalancing:DescribeTargetHealth",
+                        "elasticloadbalancing:DescribeTags",
+                        "elasticloadbalancing:DescribeTrustStores"
+                    ],
+                    "Resource": "*"
+                },
+                {
+                    "Effect": "Allow",
+                    "Action": [
+                        "cognito-idp:DescribeUserPoolClient",
+                        "acm:ListCertificates",
+                        "acm:DescribeCertificate",
+                        "iam:ListServerCertificates",
+                        "iam:GetServerCertificate",
+                        "waf-regional:GetWebACL",
+                        "waf-regional:GetWebACLForResource",
+                        "waf-regional:AssociateWebACL",
+                        "waf-regional:DisassociateWebACL",
+                        "wafv2:GetWebACL",
+                        "wafv2:GetWebACLForResource",
+                        "wafv2:AssociateWebACL",
+                        "wafv2:DisassociateWebACL",
+                        "shield:GetSubscriptionState",
+                        "shield:DescribeProtection",
+                        "shield:CreateProtection",
+                        "shield:DeleteProtection"
+                    ],
+                    "Resource": "*"
+                },
+                {
+                    "Effect": "Allow",
+                    "Action": [
+                        "ec2:AuthorizeSecurityGroupIngress",
+                        "ec2:RevokeSecurityGroupIngress"
+                    ],
+                    "Resource": "*"
+                },
+                {
+                    "Effect": "Allow",
+                    "Action": [
+                        "ec2:CreateSecurityGroup"
+                    ],
+                    "Resource": "*"
+                },
+                {
+                    "Effect": "Allow",
+                    "Action": [
+                        "ec2:CreateTags"
+                    ],
+                    "Resource": "arn:aws:ec2:*:*:security-group/*",
+                    "Condition": {
+                        "StringEquals": {
+                            "ec2:CreateAction": "CreateSecurityGroup"
+                        },
+                        "Null": {
+                            "aws:RequestTag/elbv2.k8s.aws/cluster": "false"
+                        }
+                    }
+                },
+                {
+                    "Effect": "Allow",
+                    "Action": [
+                        "ec2:CreateTags",
+                        "ec2:DeleteTags"
+                    ],
+                    "Resource": "arn:aws:ec2:*:*:security-group/*",
+                    "Condition": {
+                        "Null": {
+                            "aws:RequestTag/elbv2.k8s.aws/cluster": "true",
+                            "aws:ResourceTag/elbv2.k8s.aws/cluster": "false"
+                        }
+                    }
+                },
+                {
+                    "Effect": "Allow",
+                    "Action": [
+                        "ec2:AuthorizeSecurityGroupIngress",
+                        "ec2:RevokeSecurityGroupIngress",
+                        "ec2:DeleteSecurityGroup"
+                    ],
+                    "Resource": "*",
+                    "Condition": {
+                        "Null": {
+                            "aws:ResourceTag/elbv2.k8s.aws/cluster": "false"
+                        }
+                    }
+                },
+                {
+                    "Effect": "Allow",
+                    "Action": [
+                        "elasticloadbalancing:CreateLoadBalancer",
+                        "elasticloadbalancing:CreateTargetGroup"
+                    ],
+                    "Resource": "*",
+                    "Condition": {
+                        "Null": {
+                            "aws:RequestTag/elbv2.k8s.aws/cluster": "false"
+                        }
+                    }
+                },
+                {
+                    "Effect": "Allow",
+                    "Action": [
+                        "elasticloadbalancing:CreateListener",
+                        "elasticloadbalancing:DeleteListener",
+                        "elasticloadbalancing:CreateRule",
+                        "elasticloadbalancing:DeleteRule"
+                    ],
+                    "Resource": "*"
+                },
+                {
+                    "Effect": "Allow",
+                    "Action": [
+                        "elasticloadbalancing:AddTags",
+                        "elasticloadbalancing:RemoveTags"
+                    ],
+                    "Resource": [
+                        "arn:aws:elasticloadbalancing:*:*:targetgroup/*/*",
+                        "arn:aws:elasticloadbalancing:*:*:loadbalancer/net/*/*",
+                        "arn:aws:elasticloadbalancing:*:*:loadbalancer/app/*/*"
+                    ],
+                    "Condition": {
+                        "Null": {
+                            "aws:RequestTag/elbv2.k8s.aws/cluster": "true",
+                            "aws:ResourceTag/elbv2.k8s.aws/cluster": "false"
+                        }
+                    }
+                },
+                {
+                    "Effect": "Allow",
+                    "Action": [
+                        "elasticloadbalancing:AddTags",
+                        "elasticloadbalancing:RemoveTags"
+                    ],
+                    "Resource": [
+                        "arn:aws:elasticloadbalancing:*:*:listener/net/*/*/*",
+                        "arn:aws:elasticloadbalancing:*:*:listener/app/*/*/*",
+                        "arn:aws:elasticloadbalancing:*:*:listener-rule/net/*/*/*",
+                        "arn:aws:elasticloadbalancing:*:*:listener-rule/app/*/*/*"
+                    ]
+                },
+                {
+                    "Effect": "Allow",
+                    "Action": [
+                        "elasticloadbalancing:ModifyLoadBalancerAttributes",
+                        "elasticloadbalancing:SetIpAddressType",
+                        "elasticloadbalancing:SetSecurityGroups",
+                        "elasticloadbalancing:SetSubnets",
+                        "elasticloadbalancing:DeleteLoadBalancer",
+                        "elasticloadbalancing:ModifyTargetGroup",
+                        "elasticloadbalancing:ModifyTargetGroupAttributes",
+                        "elasticloadbalancing:DeleteTargetGroup"
+                    ],
+                    "Resource": "*",
+                    "Condition": {
+                        "Null": {
+                            "aws:ResourceTag/elbv2.k8s.aws/cluster": "false"
+                        }
+                    }
+                },
+                {
+                    "Effect": "Allow",
+                    "Action": [
+                        "elasticloadbalancing:AddTags"
+                    ],
+                    "Resource": [
+                        "arn:aws:elasticloadbalancing:*:*:targetgroup/*/*",
+                        "arn:aws:elasticloadbalancing:*:*:loadbalancer/net/*/*",
+                        "arn:aws:elasticloadbalancing:*:*:loadbalancer/app/*/*"
+                    ],
+                    "Condition": {
+                        "StringEquals": {
+                            "elasticloadbalancing:CreateAction": [
+                                "CreateTargetGroup",
+                                "CreateLoadBalancer"
+                            ]
+                        },
+                        "Null": {
+                            "aws:RequestTag/elbv2.k8s.aws/cluster": "false"
+                        }
+                    }
+                },
+                {
+                    "Effect": "Allow",
+                    "Action": [
+                        "elasticloadbalancing:RegisterTargets",
+                        "elasticloadbalancing:DeregisterTargets"
+                    ],
+                    "Resource": "arn:aws:elasticloadbalancing:*:*:targetgroup/*/*"
+                },
+                {
+                    "Effect": "Allow",
+                    "Action": [
+                        "elasticloadbalancing:SetWebAcl",
+                        "elasticloadbalancing:ModifyListener",
+                        "elasticloadbalancing:AddListenerCertificates",
+                        "elasticloadbalancing:RemoveListenerCertificates",
+                        "elasticloadbalancing:ModifyRule"
+                    ],
+                    "Resource": "*"
+                }
+            ]
+        },
+        "VersionId": "v2",
+[ec2-user@ip-10-0-23-79 ~]$ kubectl get svc -n nodejs
+NAME            TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)        AGE
+nginx-service   LoadBalancer   172.20.20.128   <pending>     80:31719/TCP   49m
+[ec2-user@ip-10-0-23-79 ~]$ vi fix-permission.json
+[ec2-user@ip-10-0-23-79 ~]$ aws iam put-role-policy \
+    --role-name AmazonEKSLoadBalancerControllerRole \
+    --policy-name QuickFixPermission \
+    --policy-document file://fix-permission.json
+
+aws: [ERROR]: An error occurred (MalformedPolicyDocument) when calling the PutRolePolicy operation: Syntax errors in policy.
+[ec2-user@ip-10-0-23-79 ~]$ aws iam put-role-policy \
+    --role-name AmazonEKSLoadBalancerControllerRole \
+    --policy-name QuickFixPermission \
+    --policy-document '{
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Effect": "Allow",
+                "Action": [
+                    "ec2:DescribeRouteTables",
+                    "ec2:DescribeSubnets",
+                    "ec2:DescribeVpcs",
+                    "ec2:DescribeSecurityGroups",
+                    "ec2:DescribeInternetGateways"
+                ],
+                "Resource": "*"
+            }
+        ]
+    }'
+[ec2-user@ip-10-0-23-79 ~]$ kubectl rollout restart deployment aws-load-balancer-controller -n kube-system
+deployment.apps/aws-load-balancer-controller restarted
+[ec2-user@ip-10-0-23-79 ~]$ kubectl get svc -n nodejs
+NAME            TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)        AGE
+nginx-service   LoadBalancer   172.20.20.128   <pending>     80:31719/TCP   53m
+[ec2-user@ip-10-0-23-79 ~]$ kubectl get svc -n nodejs
+NAME            TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)        AGE
+nginx-service   LoadBalancer   172.20.20.128   <pending>     80:31719/TCP   54m
+[ec2-user@ip-10-0-23-79 ~]$ kubectl get svc -n nodejs
+NAME            TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)        AGE
+nginx-service   LoadBalancer   172.20.20.128   <pending>     80:31719/TCP   63m
+[ec2-user@ip-10-0-23-79 ~]$ kubectl describe svc nginx-service -n nodejs
+Warning: v1 Endpoints is deprecated in v1.33+; use discovery.k8s.io/v1 EndpointSlice
+Name:                     nginx-service
+Namespace:                nodejs
+Labels:                   <none>
+Annotations:              service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: instance
+                          service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+                          service.beta.kubernetes.io/aws-load-balancer-type: external
+Selector:                 app=nginx
+Type:                     LoadBalancer
+IP Family Policy:         SingleStack
+IP Families:              IPv4
+IP:                       172.20.20.128
+IPs:                      172.20.20.128
+Port:                     <unset>  80/TCP
+TargetPort:               80/TCP
+NodePort:                 <unset>  31719/TCP
+Endpoints:                10.0.129.20:80,10.0.140.57:80
+Session Affinity:         None
+External Traffic Policy:  Cluster
+Events:
+  Type     Reason             Age                  From     Message
+  ----     ------             ----                 ----     -------
+  Warning  FailedBuildModel   58m (x8 over 63m)    service  (combined from similar events): Failed build model due to failed to list subnets by reachability: operation error EC2: DescribeRouteTables, https response error StatusCode: 403, RequestID: a0df6c48-ed0a-42cd-b973-564f237c12a0, api error UnauthorizedOperation: You are not authorized to perform this operation. User: arn:aws:sts::723738378076:assumed-role/AmazonEKSLoadBalancerControllerRole/1775563540564742524 is not authorized to perform: ec2:DescribeRouteTables because no identity-based policy allows the ec2:DescribeRouteTables action
+  Warning  FailedBuildModel   57m                  service  Failed build model due to failed to list subnets by reachability: operation error EC2: DescribeRouteTables, https response error StatusCode: 403, RequestID: 25e03066-7fd9-47c8-a195-c6ddc405c68a, api error UnauthorizedOperation: You are not authorized to perform this operation. User: arn:aws:sts::723738378076:assumed-role/AmazonEKSLoadBalancerControllerRole/1775563937329781203 is not authorized to perform: ec2:DescribeRouteTables because no identity-based policy allows the ec2:DescribeRouteTables action
+  Warning  FailedBuildModel   57m                  service  Failed build model due to failed to list subnets by reachability: operation error EC2: DescribeRouteTables, https response error StatusCode: 403, RequestID: 4f955826-4481-4abb-b04b-7c97e9780444, api error UnauthorizedOperation: You are not authorized to perform this operation. User: arn:aws:sts::723738378076:assumed-role/AmazonEKSLoadBalancerControllerRole/1775563937329781203 is not authorized to perform: ec2:DescribeRouteTables because no identity-based policy allows the ec2:DescribeRouteTables action
+  Warning  FailedBuildModel   57m                  service  Failed build model due to failed to list subnets by reachability: operation error EC2: DescribeRouteTables, https response error StatusCode: 403, RequestID: 2f6efcab-3248-4693-9c49-5c0b9a1d6c8c, api error UnauthorizedOperation: You are not authorized to perform this operation. User: arn:aws:sts::723738378076:assumed-role/AmazonEKSLoadBalancerControllerRole/1775563937329781203 is not authorized to perform: ec2:DescribeRouteTables because no identity-based policy allows the ec2:DescribeRouteTables action
+  Warning  FailedBuildModel   57m                  service  Failed build model due to failed to list subnets by reachability: operation error EC2: DescribeRouteTables, https response error StatusCode: 403, RequestID: db7b2607-7e47-4b20-981c-ea3cc59ad537, api error UnauthorizedOperation: You are not authorized to perform this operation. User: arn:aws:sts::723738378076:assumed-role/AmazonEKSLoadBalancerControllerRole/1775563937329781203 is not authorized to perform: ec2:DescribeRouteTables because no identity-based policy allows the ec2:DescribeRouteTables action
+  Warning  FailedBuildModel   57m                  service  Failed build model due to failed to list subnets by reachability: operation error EC2: DescribeRouteTables, https response error StatusCode: 403, RequestID: 98b1ca91-acee-49b7-99a4-6b480f640165, api error UnauthorizedOperation: You are not authorized to perform this operation. User: arn:aws:sts::723738378076:assumed-role/AmazonEKSLoadBalancerControllerRole/1775563937329781203 is not authorized to perform: ec2:DescribeRouteTables because no identity-based policy allows the ec2:DescribeRouteTables action
+  Warning  FailedBuildModel   57m                  service  Failed build model due to failed to list subnets by reachability: operation error EC2: DescribeRouteTables, https response error StatusCode: 403, RequestID: 2d9d0f62-89ca-40ce-9d3f-eb2fce1ffb70, api error UnauthorizedOperation: You are not authorized to perform this operation. User: arn:aws:sts::723738378076:assumed-role/AmazonEKSLoadBalancerControllerRole/1775563937329781203 is not authorized to perform: ec2:DescribeRouteTables because no identity-based policy allows the ec2:DescribeRouteTables action
+  Warning  FailedBuildModel   57m                  service  Failed build model due to failed to list subnets by reachability: operation error EC2: DescribeRouteTables, https response error StatusCode: 403, RequestID: 91a9dc59-ae60-4aa9-89da-571dd59860bd, api error UnauthorizedOperation: You are not authorized to perform this operation. User: arn:aws:sts::723738378076:assumed-role/AmazonEKSLoadBalancerControllerRole/1775563937329781203 is not authorized to perform: ec2:DescribeRouteTables because no identity-based policy allows the ec2:DescribeRouteTables action
+  Warning  FailedBuildModel   57m                  service  Failed build model due to failed to list subnets by reachability: operation error EC2: DescribeRouteTables, https response error StatusCode: 403, RequestID: 9af64393-5ae5-40f2-9b3b-7456608af9b8, api error UnauthorizedOperation: You are not authorized to perform this operation. User: arn:aws:sts::723738378076:assumed-role/AmazonEKSLoadBalancerControllerRole/1775563937329781203 is not authorized to perform: ec2:DescribeRouteTables because no identity-based policy allows the ec2:DescribeRouteTables action
+  Warning  FailedBuildModel   57m                  service  Failed build model due to failed to list subnets by reachability: operation error EC2: DescribeRouteTables, https response error StatusCode: 403, RequestID: f7d4ace5-9d02-456e-96fc-f6c1053017a7, api error UnauthorizedOperation: You are not authorized to perform this operation. User: arn:aws:sts::723738378076:assumed-role/AmazonEKSLoadBalancerControllerRole/1775563937329781203 is not authorized to perform: ec2:DescribeRouteTables because no identity-based policy allows the ec2:DescribeRouteTables action
+  Warning  FailedBuildModel   46m (x9 over 57m)    service  (combined from similar events): Failed build model due to failed to list subnets by reachability: operation error EC2: DescribeRouteTables, https response error StatusCode: 403, RequestID: 4e88d01c-8e4f-4d13-a5b5-43bda5eacf05, api error UnauthorizedOperation: You are not authorized to perform this operation. User: arn:aws:sts::723738378076:assumed-role/AmazonEKSLoadBalancerControllerRole/1775563937329781203 is not authorized to perform: ec2:DescribeRouteTables because no identity-based policy allows the ec2:DescribeRouteTables action
+  Warning  FailedBuildModel   35m                  service  Failed build model due to failed to list subnets by reachability: operation error EC2: DescribeRouteTables, https response error StatusCode: 403, RequestID: e93918fd-d7b7-4500-8337-25c89f0b892f, api error UnauthorizedOperation: You are not authorized to perform this operation. User: arn:aws:sts::723738378076:assumed-role/AmazonEKSLoadBalancerControllerRole/1775563937329781203 is not authorized to perform: ec2:DescribeRouteTables because no identity-based policy allows the ec2:DescribeRouteTables action
+  Warning  FailedBuildModel   18m                  service  Failed build model due to failed to list subnets by reachability: operation error EC2: DescribeRouteTables, https response error StatusCode: 403, RequestID: 9ad982de-0070-4286-804f-072400d79ce5, api error UnauthorizedOperation: You are not authorized to perform this operation. User: arn:aws:sts::723738378076:assumed-role/AmazonEKSLoadBalancerControllerRole/1775563937329781203 is not authorized to perform: ec2:DescribeRouteTables because no identity-based policy allows the ec2:DescribeRouteTables action
+  Warning  FailedDeployModel  11m                  service  Failed deploy model due to operation error Elastic Load Balancing v2: CreateLoadBalancer, https response error StatusCode: 403, RequestID: 4847f9cf-0de8-4419-b89c-76499fbdb925, api error AccessDenied: User: arn:aws:sts::723738378076:assumed-role/AmazonEKSLoadBalancerControllerRole/1775566692123570890 is not authorized to perform: ec2:GetSecurityGroupsForVpc
+  Warning  FailedDeployModel  11m                  service  Failed deploy model due to operation error Elastic Load Balancing v2: CreateLoadBalancer, https response error StatusCode: 403, RequestID: 73c385d1-279d-4565-bb95-3f44f52ee0f9, api error AccessDenied: User: arn:aws:sts::723738378076:assumed-role/AmazonEKSLoadBalancerControllerRole/1775566692123570890 is not authorized to perform: ec2:GetSecurityGroupsForVpc
+  Warning  FailedDeployModel  11m                  service  Failed deploy model due to operation error Elastic Load Balancing v2: CreateLoadBalancer, https response error StatusCode: 403, RequestID: 107c9eca-5727-4ee9-b465-4678c2f8ed04, api error AccessDenied: User: arn:aws:sts::723738378076:assumed-role/AmazonEKSLoadBalancerControllerRole/1775566692123570890 is not authorized to perform: ec2:GetSecurityGroupsForVpc
+  Warning  FailedDeployModel  11m                  service  Failed deploy model due to operation error Elastic Load Balancing v2: CreateLoadBalancer, https response error StatusCode: 403, RequestID: be62b934-122b-4f03-a967-e0ca29087f68, api error AccessDenied: User: arn:aws:sts::723738378076:assumed-role/AmazonEKSLoadBalancerControllerRole/1775566692123570890 is not authorized to perform: ec2:GetSecurityGroupsForVpc
+  Warning  FailedDeployModel  11m                  service  Failed deploy model due to operation error Elastic Load Balancing v2: DescribeListenerAttributes, https response error StatusCode: 403, RequestID: 3bba6142-03b6-41ff-8e07-c347837717ee, api error AccessDenied: User: arn:aws:sts::723738378076:assumed-role/AmazonEKSLoadBalancerControllerRole/1775566692123570890 is not authorized to perform: elasticloadbalancing:DescribeListenerAttributes because no identity-based policy allows the elasticloadbalancing:DescribeListenerAttributes action
+  Warning  FailedDeployModel  11m                  service  Failed deploy model due to operation error Elastic Load Balancing v2: DescribeListenerAttributes, https response error StatusCode: 403, RequestID: ffb55b45-8c1f-47aa-861e-22af61b79b94, api error AccessDenied: User: arn:aws:sts::723738378076:assumed-role/AmazonEKSLoadBalancerControllerRole/1775566692123570890 is not authorized to perform: elasticloadbalancing:DescribeListenerAttributes because no identity-based policy allows the elasticloadbalancing:DescribeListenerAttributes action
+  Warning  FailedDeployModel  11m                  service  Failed deploy model due to operation error Elastic Load Balancing v2: DescribeListenerAttributes, https response error StatusCode: 403, RequestID: 6739f2e9-c4f9-407d-9432-1cd6fc5199ff, api error AccessDenied: User: arn:aws:sts::723738378076:assumed-role/AmazonEKSLoadBalancerControllerRole/1775566692123570890 is not authorized to perform: elasticloadbalancing:DescribeListenerAttributes because no identity-based policy allows the elasticloadbalancing:DescribeListenerAttributes action
+  Warning  FailedDeployModel  11m                  service  Failed deploy model due to operation error Elastic Load Balancing v2: DescribeListenerAttributes, https response error StatusCode: 403, RequestID: 4d6ccfb8-e006-44a6-b37e-46479149c95a, api error AccessDenied: User: arn:aws:sts::723738378076:assumed-role/AmazonEKSLoadBalancerControllerRole/1775566692123570890 is not authorized to perform: elasticloadbalancing:DescribeListenerAttributes because no identity-based policy allows the elasticloadbalancing:DescribeListenerAttributes action
+  Warning  FailedDeployModel  10m                  service  Failed deploy model due to operation error Elastic Load Balancing v2: DescribeListenerAttributes, https response error StatusCode: 403, RequestID: ce0d5644-2027-4847-bc1e-2ad38b8cffa4, api error AccessDenied: User: arn:aws:sts::723738378076:assumed-role/AmazonEKSLoadBalancerControllerRole/1775566692123570890 is not authorized to perform: elasticloadbalancing:DescribeListenerAttributes because no identity-based policy allows the elasticloadbalancing:DescribeListenerAttributes action
+  Warning  FailedDeployModel  5m21s (x8 over 10m)  service  (combined from similar events): Failed deploy model due to operation error Elastic Load Balancing v2: DescribeListenerAttributes, https response error StatusCode: 403, RequestID: 83a521cc-2075-4f63-b358-5513cc21c5ef, api error AccessDenied: User: arn:aws:sts::723738378076:assumed-role/AmazonEKSLoadBalancerControllerRole/1775566692123570890 is not authorized to perform: elasticloadbalancing:DescribeListenerAttributes because no identity-based policy allows the elasticloadbalancing:DescribeListenerAttributes action
+[ec2-user@ip-10-0-23-79 ~]$ aws iam put-role-policy \
+    --role-name AmazonEKSLoadBalancerControllerRole \
+    --policy-name QuickFixPermission \
+    --policy-document '{
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Effect": "Allow",
+                "Action": [
+                    "ec2:DescribeAccountAttributes",
+                    "ec2:DescribeAddresses",
+                    "ec2:DescribeAvailabilityZones",
+                    "ec2:DescribeInternetGateways",
+                    "ec2:DescribeVpcs",
+                    "ec2:DescribeSubnets",
+                    "ec2:DescribeSecurityGroups",
+                    "ec2:DescribeInstances",
+                    "ec2:DescribeNetworkInterfaces",
+                    "ec2:DescribeTags",
+                    "ec2:GetCoipPoolUsage",
+                    "ec2:DescribeCoipPools",
+                    "ec2:DescribeRouteTables",
+                    "elasticloadbalancing:*",
+                    "iam:CreateServiceLinkedRole",
+                    "cognito-idp:DescribeUserPoolClient",
+                    "acm:ListCertificates",
+                    "acm:DescribeCertificate",
+                    "iam:ListServerCertificates",
+                    "iam:GetServerCertificate",
+                    "waf-regional:GetWebACL",
+                    "waf-regional:GetWebACLForResource",
+                    "waf-regional:AssociateWebACL",
+                    "waf-regional:DisassociateWebACL",
+                    "wafv2:GetWebACL",
+                    "wafv2:GetWebACLForResource",
+                    "wafv2:AssociateWebACL",
+                    "wafv2:DisassociateWebACL",
+                    "shield:GetSubscriptionState",
+                    "shield:DescribeProtection",
+                    "shield:CreateProtection",
+                    "shield:DeleteProtection"
+                ],
+    }'  ]   }   "Resource": "*"
+[ec2-user@ip-10-0-23-79 ~]$ kubectl rollout restart deployment aws-load-balancer-controller -n kube-system
+deployment.apps/aws-load-balancer-controller restarted
+[ec2-user@ip-10-0-23-79 ~]$ aws iam put-role-policy     --role-name AmazonEKSLoadBalancerControllerRole     --policy-name QuickFixPermission     --policy-document '{
+        "Version": "2012-10-kubectl describe svc nginx-service -n nodejs
+                            aws iam put-role-policy     --role-name AmazonEKSLoadBalancerControllerRole     --policy-name QuickFixPermission     --policy-document file://fix-permission.json^C
+[ec2-user@ip-10-0-23-79 ~]$ kubectl get svc -n nodejs
+NAME            TYPE           CLUSTER-IP      EXTERNAL-IP                                                                    PORT(S)        AGE
+nginx-service   LoadBalancer   172.20.20.128   k8s-nodejs-nginxser-d9f08ceb73-31dd1c3ce0790198.elb.ap-south-1.amazonaws.com   80:31719/TCP   67m
+[ec2-user@ip-10-0-23-79 ~]$ history
+    1  curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+    2  unzip awscliv2.zip
+    3  sudo ./aws/install
+    4  sudo apt-get update && sudo apt-get install -y apt-transport-https ca-certificates curl
+    5  sudo curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.30/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+    6  echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.30/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+    7  sudo apt-get update
+    8  sudo apt-get install -y kubectl
+    9  curl -O https://s3.us-west-2.amazonaws.com/amazon-eks/1.30.0/2024-05-12/bin/linux/amd64/kubectl
+   10  chmod +x ./kubectl
+   11  mkdir -p $HOME/bin && cp ./kubectl $HOME/bin/kubectl && export PATH=$HOME/bin:$PATH
+   12  echo 'export PATH=$HOME/bin:$PATH' >> ~/.bashrc
+   13  kubectl version --client
+   14  aws configure
+   15  aws eks update-kubeconfig --region ap-south-1 --name node-cluster
+   16  kubectl create namespace nodejs
+   17  vi deployment.yaml
+   18  kubectl apply -f deployment.yaml -n nodejs
+   19  kubectl get pods -n nodejs
+   20  vi service.yaml
+   21  kubectl apply -f service.yaml
+   22  kubectl get svc -n nodejs
+   23  kubectl delete svc nginx-service -n nodejs
+   24  kubectl apply -f service.yaml
+   25  kubectl get svc -n nodejs
+   26  kubectl logs -n kube-system -l app.kubernetes.io/name=aws-load-balancer-controller
+   27  kubectl describe svc nginx-service -n nodejs
+   28  vi service.yaml
+   29  kubectl apply -f service.yaml
+   30  kubectl get svc -n nodejs
+   31  kubectl describe svc nginx-service -n nodejs
+   32  history
+   33  kubectl get svc -n nodejs
+   34  kubectl describe svc nginx-service -n nodejs
+   35  kubectl delete svc nginx-service -n nodejs
+   36  kubectl apply -f service.yaml
+   37  kubectl get svc -n nodejs
+   38  kubectl describe svc nginx-service -n nodejs
+   39  kubectl delete svc nginx-service -n nodejs
+   40  kubectl apply -f service.yaml
+   41  kubectl get svc -n nodejs
+   42  kubectl logs -n kube-system -l app.kubernetes.io/name=aws-load-balancer-controller --tail=100 | grep -i "subnets"
+   43  kubectl logs -n nodejs -l app.kubernetes.io/name=aws-load-balancer-controller --tail=100 | grep -i "subnets"
+   44  kubectl get pods -n nodejs
+   45  kubectl logs deployment/nginx-deployment -n nodejs
+   46  kubectl logs -n kube-system deployment.apps/aws-load-balancer-controller
+   47  kubectl get all -n nodejs
+   48  kubectl get pods -n kube-system
+   49  kubectl get svc -n kube-system
+   50  kubectl get pods -n kube-system | grep aws-load-balancer
+   51  curl -O https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/v2.7.2/docs/install/iam_policy.json
+   52  aws iam create-policy     --policy-name AWSLoadBalancerControllerIAMPolicy     --policy-document file://iam_policy.json
+   53  kubectl get all -n nodejs
+   54  # Replace <cluster-name> with your actual cluster name
+   55  aws eks describe-cluster --name node-cluster --query "cluster.identity.oidc.issuer" --output text
+   56  curl -O https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/v2.7.2/docs/install/iam_policy.json
+   57  aws iam create-policy     --policy-name AWSLoadBalancerControllerIAMPolicy     --policy-document file://iam_policy.json
+   58  eksctl create iamserviceaccount   --cluster=node-js   --namespace=kube-system   --name=aws-load-balancer-controller   --role-name AmazonEKSLoadBalancerControllerRole   --attach-policy-arn=arn:aws:iam::723738378076:policy/AWSLoadBalancerControllerIAMPolicy   --approve   --region ap-south-1
+   59  # Download the latest binary (64-bit Linux)
+   60  curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
+   61  # Move it to /usr/local/bin so it's in your PATH
+   62  sudo mv /tmp/eksctl /usr/local/bin
+   63  eksctl version
+   64  eksctl create iamserviceaccount   --cluster=node-js   --namespace=kube-system   --name=aws-load-balancer-controller   --role-name AmazonEKSLoadBalancerControllerRole   --attach-policy-arn=arn:aws:iam::723738378076:policy/AWSLoadBalancerControllerIAMPolicy   --approve   --region ap-south-1
+   65  eksctl create iamserviceaccount   --cluster=node-cluster   --namespace=kube-system   --name=aws-load-balancer-controller   --role-name AmazonEKSLoadBalancerControllerRole   --attach-policy-arn=arn:aws:iam::723738378076:policy/AWSLoadBalancerControllerIAMPolicy   --approve   --region ap-south-1
+   66  eksctl utils associate-iam-oidc-provider     --region ap-south-1     --cluster node-cluster     --approve
+   67  eksctl create iamserviceaccount   --cluster=node-cluster   --namespace=kube-system   --name=aws-load-balancer-controller   --role-name AmazonEKSLoadBalancerControllerRole   --attach-policy-arn=arn:aws:iam::723738378076:policy/AWSLoadBalancerControllerIAMPolicy   --approve   --region ap-south-1
+   68  helm repo add eks https://aws.github.io/eks-charts
+   69  helm repo update
+   70  curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+   71  chmod 700 get_helm.sh
+   72  ./get_helm.sh
+   73  helm version
+   74  helm repo add eks https://aws.github.io/eks-charts
+   75  helm repo update
+   76  helm install aws-load-balancer-controller eks/aws-load-balancer-controller   -n kube-system   --set clusterName=node-cluster   --set serviceAccount.create=false   --set serviceAccount.name=aws-load-balancer-controller   --set region=ap-south-1   --set vpcId=vpc-0c41b24ea76614c60
+   77  kubectl get pods -n kube-system | grep aws-load-balancer
+   78  kubectl get svc -n nodejs
+   79  kubectl logs -n kube-system -l app.kubernetes.io/name=aws-load-balancer-controller
+   80  kubectl get svc -n nodejs
+   81  kubectl logs -n kube-system -l app.kubernetes.io/name=aws-load-balancer-controller
+   82  kubectl get svc -n nodejs
+   83  kubectl logs -n kube-system -l app.kubernetes.io/name=aws-load-balancer-controller
+   84  kubectl get pods -n npdejs
+   85  kubectl get pods -n nodejs
+   86  kubectl describe pod nginx-deployment-59f86b59ff-2cm6z
+   87  kubectl describe pod nginx-deployment-59f86b59ff-2cm6z -n nodejs
+   88  kubectl get svc -n nodejs
+   89  kubectl describe svc nginx-service -n nodejs
+   90  kubectl logs -n kube-system -l app.kubernetes.io/name=aws-load-balancer-controller --tail=200 | grep -i "subnets"
+   91  kubectl delete svc nginx-service -n nodejs
+   92  kubectl apply -f service.yaml
+   93  kubectl get svc -n kube-system aws-load-balancer-webhook-service
+   94  kubectl get endpoints -n kube-system aws-load-balancer-webhook-service
+   95  kubectl apply -f service.yaml
+   96  kubectl get svc -n nodejs
+   97  kubectl describe svc nginx-service -n nodejs
+   98  curl -O https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/v2.7.2/docs/install/iam_policy.json
+   99  # This updates the policy content in AWS to the correct version
+  100  aws iam create-policy-version     --policy-arn arn:aws:iam::723738378076:policy/AWSLoadBalancerControllerIAMPolicy     --policy-document file://iam_policy.json     --set-as-default
+  101  aws iam attach-role-policy     --role-name AmazonEKSLoadBalancerControllerRole     --policy-arn arn:aws:iam::723738378076:policy/AWSLoadBalancerControllerIAMPolicy
+  102  kubectl rollout restart deployment aws-load-balancer-controller -n kube-system
+  103  kubectl get svc -n nodejs
+  104  kubectl describe svc nginx-service -n nodejs
+  105  aws iam get-policy-version     --policy-arn arn:aws:iam::723738378076:policy/AWSLoadBalancerControllerIAMPolicy     --version-id $(aws iam get-policy --policy-arn arn:aws:iam::723738378076:policy/AWSLoadBalancerControllerIAMPolicy --query 'Policy.DefaultVersionId' --output text)
+  106  kubectl get svc -n nodejs
+  107  vi fix-permission.json
+  108  aws iam put-role-policy     --role-name AmazonEKSLoadBalancerControllerRole     --policy-name QuickFixPermission     --policy-document file://fix-permission.json
+  109  aws iam put-role-policy     --role-name AmazonEKSLoadBalancerControllerRole     --policy-name QuickFixPermission     --policy-document '{
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Effect": "Allow",
+                "Action": [
+                    "ec2:DescribeRouteTables",
+                    "ec2:DescribeSubnets",
+                    "ec2:DescribeVpcs",
+                    "ec2:DescribeSecurityGroups",
+                    "ec2:DescribeInternetGateways"
+                ],
+                "Resource": "*"
+            }
+        ]
+    }'
+  110  kubectl rollout restart deployment aws-load-balancer-controller -n kube-system
+  111  kubectl get svc -n nodejs
+  112  kubectl describe svc nginx-service -n nodejs
+  113  aws iam put-role-policy     --role-name AmazonEKSLoadBalancerControllerRole     --policy-name QuickFixPermission     --policy-document '{
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Effect": "Allow",
+                "Action": [
+                    "ec2:DescribeAccountAttributes",
+                    "ec2:DescribeAddresses",
+                    "ec2:DescribeAvailabilityZones",
+                    "ec2:DescribeInternetGateways",
+                    "ec2:DescribeVpcs",
+                    "ec2:DescribeSubnets",
+                    "ec2:DescribeSecurityGroups",
+                    "ec2:DescribeInstances",
+                    "ec2:DescribeNetworkInterfaces",
+                    "ec2:DescribeTags",
+                    "ec2:GetCoipPoolUsage",
+                    "ec2:DescribeCoipPools",
+                    "ec2:DescribeRouteTables",
+                    "elasticloadbalancing:*",
+                    "iam:CreateServiceLinkedRole",
+                    "cognito-idp:DescribeUserPoolClient",
+                    "acm:ListCertificates",
+                    "acm:DescribeCertificate",
+                    "iam:ListServerCertificates",
+                    "iam:GetServerCertificate",
+                    "waf-regional:GetWebACL",
+                    "waf-regional:GetWebACLForResource",
+                    "waf-regional:AssociateWebACL",
+                    "waf-regional:DisassociateWebACL",
+                    "wafv2:GetWebACL",
+                    "wafv2:GetWebACLForResource",
+                    "wafv2:AssociateWebACL",
+                    "wafv2:DisassociateWebACL",
+                    "shield:GetSubscriptionState",
+                    "shield:DescribeProtection",
+                    "shield:CreateProtection",
+                    "shield:DeleteProtection"
+                ],
+                "Resource": "*"
+            }
+        ]
+    }'
+  114  kubectl rollout restart deployment aws-load-balancer-controller -n kube-system
+  115  kubectl get svc -n nodejs
+  116  history
+[ec2-user@ip-10-0-23-79 ~]$ 

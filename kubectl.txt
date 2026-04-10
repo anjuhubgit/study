@@ -1,0 +1,683 @@
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
+
+kubectl
+curl -O https://s3.us-west-2.amazonaws.com/amazon-eks/1.30.0/2024-05-12/bin/linux/amd64/kubectl
+chmod +x ./kubectl
+mkdir -p $HOME/bin && cp ./kubectl $HOME/bin/kubectl && export PATH=$HOME/bin:$PATH
+echo 'export PATH=$HOME/bin:$PATH' >> ~/.bashrc
+kubectl version --client
+
+aws configure
+
+aws eks update-kubeconfig --region ap-south-1 --name node-cluster
+kubectl create namespace nodejs
+
+nginx-deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nodejs-deployment
+  namespace: nodejs  # Ensures it goes into the nodejs namespace
+  labels:
+    app: nodejs
+spec:
+  replicas: 2        # Number of pods to run
+  selector:
+    matchLabels:
+      app: nodejs
+  template:
+    metadata:
+      labels:
+        app: nodejs
+    spec:
+      containers:
+      - name: nodejs
+        image: 723738378076.dkr.ecr.ap-south-1.amazonaws.com/myimagerepo
+        ports:
+        - containerPort: 80
+		
+kubectl apply -f deployment.yaml -n nodejs
+
+error 1 -Disabled logging because aws-logging configmap was not found. configmap "aws-logging" not found
+This error typically occurs when the Amazon EKS Fargate profile is looking for instructions on where to send logs, but the required configuration hasn't been created in the aws-logging namespace.
+kubectl create namespace aws-logging
+vi aws-logging-cm.yaml
+
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: aws-logging
+  namespace: aws-logging
+data:
+  flb_log_conf: |
+    [SERVICE]
+        Flush                     5
+        Grace                     30
+        Log_Level                 info
+        Daemon                    off
+        Parsers_File              parsers.conf
+        HTTP_Server               On
+        HTTP_Listen               0.0.0.0
+        HTTP_Port                 2020
+        Storage.path              /var/log/fluent-bit/storage
+        Storage.sync              normal
+        Storage.checksum          off
+        Storage.backlog.mem_limit 5M
+
+    [INPUT]
+        Name                tail
+        Tag                 kube.*
+        Path                /var/log/containers/*.log
+        Parser              docker
+        DB                  /var/log/fluent-bit/state/flb_container.db
+        Mem_Buf_Limit       5MB
+        Skip_Long_Lines     On
+        Refresh_Interval    10
+
+    [OUTPUT]
+        Name                cloudwatch_logs
+        Match               kube.*
+        region              ap-south-1
+        log_group_name      /aws/eks/node-cluster/fargate
+        log_stream_prefix   fargate-
+        auto_create_group   true
+  filters.conf: |
+    [FILTER]
+        Name                kubernetes
+        Match               kube.*
+        Merge_Log           On
+        Keep_Log            Off
+        Buffer_Size         0
+        Kube_Meta_Cache_TTL 300s
+		
+kubectl apply -f aws-logging-cm.yaml
+Note : Verify IAM Permissions
+Even with the ConfigMap, the logs won't flow if the Fargate Execution Role doesn't have permission to write to CloudWatch.
+
+Ensure your Fargate Pod execution role has a policy attached that includes:
+
+logs:CreateLogGroup
+
+logs:CreateLogStream
+
+logs:DescribeLogGroups
+
+logs:DescribeLogStreams
+
+logs:PutLogEvents
+
+kubectl rollout restart deployment <YOUR_DEPLOYMENT_NAME> (if needed or generally pod start running once config map is applied)
+
+service.yamlapiVersion: v1
+kind: Service
+metadata:
+  name: nodejs-service
+  namespace: nodejs
+spec:
+  selector:
+    app: nodejs       # This MUST match the label in your deployment
+  ports:
+    - protocol: TCP
+      port: 80       # Port the Load Balancer listens on
+      targetPort: 80 # Port the Nginx pod is listening on
+  type: LoadBalancer
+  
+  or 
+  
+apiVersion: v1
+kind: Service
+metadata:
+  name: nodejs-service
+  annotations:
+    # This tells AWS to create a Network Load Balancer (NLB)
+    service.beta.kubernetes.io/aws-load-balancer-type: "external"
+    service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: "ip" 
+spec:
+  type: LoadBalancer
+  selector:
+    app: nodejs # Must match your pod's labels
+  ports:
+    - protocol: TCP
+      port: 80        # Port the Load Balancer listens on
+      targetPort: 3000 # Port your app listens on
+	  
+	  
+kubectl apply -f service.yaml
+kubectl get svc -n nodejs
+kubectl describe svc nodejs-service -n nodejs
+kubectl delete svc nodejs-service -n nodejs
+
+error 2 - Warning  FailedBuildModel  10s (x13 over 31s)  service  Failed build model due to unable to resolve at least one subnet (0 match VPC and tags: [kubernetes.io/role/internal-elb])
+as solution added tags to private subntes Key: kubernetes.io/role/internal-elb
+Value: 1 , key: kubernetes.io/cluster/node-cluster
+value: shared (or owned)
+
+error 3 - Warning  FailedBuildModel  2m22s  service  Failed build model due to unable to resolve at least one subnet (0 match VPC and tags: [kubernetes.io/role/internal-elb])
+
+cross check 
+# Find the pod name
+kubectl get pods -n kube-system | grep aws-load-balancer-controller
+If that command returns nothing, it means the AWS Load Balancer Controller is not installed in your cluster.
+The error you're seeing (FailedBuildModel) happens because Kubernetes sees your LoadBalancer request, but the "brain" that actually talks to AWS to build the balancer isn't there to process it.
+
+# View the logs
+kubectl logs -f <pod-name> -n kube-system
+
+You need to install the controller using Helm. Here is the high-level path:
+1. Create an IAM Policy
+The controller needs permission to create Load Balancers for you. Download the policy from AWS:
+
+Bash
+curl -O https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/v2.7.2/docs/install/iam_policy.json
+Create the policy in AWS:
+
+Bash
+aws iam create-policy \
+    --policy-name AWSLoadBalancerControllerIAMPolicy \
+    --policy-document file://iam_policy.json
+	
+eksctl create iamserviceaccount \
+  --cluster=node-cluster \
+  --namespace=kube-system \
+  --name=aws-load-balancer-controller \
+  --role-name AmazonEKSLoadBalancerControllerRole \
+  --attach-policy-arn=arn:aws:iam::723738378076:policy/AWSLoadBalancerControllerIAMPolicy \
+  --approve
+ eksctl: command not found
+ 
+1. Download and Extract
+Run the following command to download the latest release and extract it directly into your /tmp folder:
+
+Bash
+# Download the latest version for your architecture (AMD64)
+curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
+Note: If you are using an ARM-based processor (like an AWS Graviton instance), replace amd64 with arm64.
+
+2. Move to Path
+Move the binary to /usr/local/bin so you can run the command from anywhere:
+
+Bash
+sudo mv /tmp/eksctl /usr/local/bin
+3. Verify the Installation
+Check that it’s working by asking for the version:
+
+Bash
+eksctl version
+
+after this tried the above eksctl create 
+error 4 - Error: could not create cluster provider from options: checking AWS STS access – cannot get role ARN for current session: operation error STS: GetCallerIdentity, https response error StatusCode: 0, RequestID: , request send failed, Post "https://sts.json.amazonaws.com/": dial tcp: lookup sts.json.amazonaws.com on 10.0.0.2:53: no such host
+
+but below command worked
+eksctl create iamserviceaccount \
+  --cluster=node-cluster \
+  --namespace=kube-system \
+  --name=aws-load-balancer-controller \
+  --role-name AmazonEKSLoadBalancerControllerRole \
+  --attach-policy-arn=arn:aws:iam::723738378076:policy/AWSLoadBalancerControllerIAMPolicy \
+  --approve \
+  --region ap-south-1
+  
+3. Install the Controller via Helm
+Now, finally, install the "chef" into your cluster:
+
+Bash
+helm repo add eks https://aws.github.io/eks-charts
+helm repo update
+
+helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
+  -n kube-system \
+  --set clusterName=node-cluster \
+  --set serviceAccount.create=false \
+  --set serviceAccount.name=aws-load-balancer-controller \
+  --set region=ap-south-1 \
+  --set vpcId=vpc-09751db15de642a45
+  
+error 5 -helm not found 
+# Download the installer script
+curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+
+# Give it permission to run
+chmod 700 get_helm.sh
+
+# Run the script
+./get_helm.sh
+
+After this above helm commands should be run
+
+kubectl get deployment -n kube-system aws-load-balancer-controller
+kubectl describe rs -n kube-system -l app.kubernetes.io/name=aws-load-balancer-controller
+Warning  FailedCreate  8s (x16 over 2m52s)  replicaset-controller  Error creating: pods "aws-load-balancer-controller-6b7dbf9b4-" is forbidden: error looking up service account kube-system/aws-load-balancer-controller: serviceaccount "aws-load-balancer-controller" not found
+
+eksctl create iamserviceaccount \
+  --cluster=node-cluster1 \
+  --namespace=kube-system \
+  --name=aws-load-balancer-controller \
+  --role-name AmazonEKSLoadBalancerControllerRole \
+  --attach-policy-arn=arn:aws:iam::723738378076:policy/AWSLoadBalancerControllerIAMPolicy \
+  --approve
+  
+2026-04-09 12:29:46 [!]  no IAM OIDC provider associated with cluster, try 'eksctl utils associate-iam-oidc-provider --region=ap-south-1 --cluster=node-cluster1'
+Error: unable to create iamserviceaccount(s) without IAM OIDC provider enabled
+
+eksctl utils associate-iam-oidc-provider \
+  --region=ap-south-1 \
+  --cluster=node-cluster1 \
+  --approve
+  
+2026-04-09 12:31:16 [ℹ]  deploying stack "eksctl-node-cluster1-addon-iamserviceaccount-kube-system-aws-load-balancer-controller"
+2026-04-09 12:31:16 [ℹ]  waiting for CloudFormation stack "eksctl-node-cluster1-addon-iamserviceaccount-kube-system-aws-load-balancer-controller"
+2026-04-09 12:31:46 [ℹ]  waiting for CloudFormation stack "eksctl-node-cluster1-addon-iamserviceaccount-kube-system-aws-load-balancer-controller"
+2026-04-09 12:31:46 [ℹ]  1 error(s) occurred and IAM Role stacks haven't been created properly, you may wish to check CloudFormation console
+2026-04-09 12:31:46 [✖]  waiter state transitioned to Failure
+Error: failed to create iamserviceaccount(s)
+
+eksctl create iamserviceaccount \
+  --cluster=node-cluster1 \
+  --namespace=kube-system \
+  --name=aws-load-balancer-controller \
+  --role-name AmazonEKSLoadBalancerControllerRole \
+  --attach-policy-arn=arn:aws:iam::723738378076:policy/AWSLoadBalancerControllerIAMPolicy \
+  --approve \
+  --override-existing-serviceaccounts \
+  --region ap-south-1
+same above error 
+
+aws eks describe-cluster --name node-cluster1 --query "cluster.identity.oidc.issuer" --output text --region ap-south-1
+
+# Create the role
+aws iam create-role --role-name AmazonEKSLoadBalancerControllerRole --assume-role-policy-document file://trust-policy.json
+
+# Attach the policy
+aws iam attach-role-policy --role-name AmazonEKSLoadBalancerControllerRole --policy-arn arn:aws:iam::723738378076:policy/AWSLoadBalancerControllerIAMPolicy
+aws: [ERROR]: An error occurred (ParamValidation): Error parsing parameter '--assume-role-policy-document': Unable to load paramfile file://trust-policy.json: [Errno 2] No such file or directory: 'trust-policy.json'
+
+cat <<EOF > trust-policy.json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Federated": "arn:aws:iam::723738378076:oidc-provider/oidc.eks.ap-south-1.amazonaws.com/id/<OIDC_ID>"
+      },
+      "Action": "sts:AssumeRoleWithWebIdentity",
+      "Condition": {
+        "StringEquals": {
+          "oidc.eks.ap-south-1.amazonaws.com/id/https://oidc.eks.ap-south-1.amazonaws.com/id/9F2790D92B10FEB1900F117135DBBFFD:sub": "system:serviceaccount:kube-system:aws-load-balancer-controller"
+        }
+      }
+    }
+  ]
+}
+EOF
+
+aws iam attach-role-policy --role-name AmazonEKSLoadBalancerControllerRole --policy-arn arn:aws:iam::723738378076:policy/AWSLoadBalancerControllerIAMPolicy
+
+cat <<EOF | kubectl apply -f -
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/name: aws-load-balancer-controller
+  name: aws-load-balancer-controller
+  namespace: kube-system
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::723738378076:role/AmazonEKSLoadBalancerControllerRole
+EOF
+
+kubectl rollout restart deployment aws-load-balancer-controller -n kube-system
+
+Warning  FailedScheduling  94s   default-scheduler  0/4 nodes are available: 4 node(s) had untolerated taint(s). no new claims to deallocate, preemption: 0/4 nodes are available: 4 Preemption is not helpful for scheduling.
+
+eksctl create fargateprofile \
+  --cluster node-cluster1 \
+  --name fp-kube-system \
+  --namespace kube-system \
+  --region ap-south-1
+  
+Error: deployments.apps "coredns" not found
+kubectl get all -n kube-system | grep coredns
+ eksctl utils update-coredns --cluster node-cluster1 --approve
+2026-04-09 12:52:07 [!]  "kube-dns" service was not found
+
+aws eks create-addon \
+  --cluster-name node-cluster1 \
+  --addon-name coredns \
+  --resolve-conflicts OVERWRITE \
+  --region ap-south-1
+  
+  core dns not found 
+  cat <<EOF | kubectl apply -f -
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: coredns
+  namespace: kube-system
+  labels:
+    eks.amazonaws.com/component: coredns
+    k8s-app: kube-dns
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      eks.amazonaws.com/component: coredns
+      k8s-app: kube-dns
+  template:
+    metadata:
+      labels:
+        eks.amazonaws.com/component: coredns
+        k8s-app: kube-dns
+    spec:
+      serviceAccountName: coredns
+      containers:
+      - name: coredns
+        image: 602401143452.dkr.ecr.ap-south-1.amazonaws.com/eks/coredns:v1.10.1-eksbuild.7
+        resources:
+          limits:
+            memory: 170Mi
+          requests:
+            cpu: 100m
+            memory: 70Mi
+        args: [ "-conf", "/etc/coredns/Corefile" ]
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/coredns
+          readOnly: true
+        ports:
+        - containerPort: 53
+          name: dns
+          protocol: UDP
+        - containerPort: 53
+          name: dns-tcp
+          protocol: TCP
+        - containerPort: 9153
+          name: metrics
+          protocol: TCP
+      volumes:
+        - name: config-volume
+          configMap:
+            name: coredns
+            items:
+            - key: Corefile
+              path: Corefile
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kube-dns
+  namespace: kube-system
+  annotations:
+    prometheus.io/port: "9153"
+    prometheus.io/scrape: "true"
+  labels:
+    eks.amazonaws.com/component: coredns
+    k8s-app: kube-dns
+    kubernetes.io/cluster-service: "true"
+    kubernetes.io/name: CoreDNS
+spec:
+  clusterIP: 10.100.0.10
+  ports:
+  - name: dns
+    port: 53
+    protocol: UDP
+  - name: dns-tcp
+    port: 53
+    protocol: TCP
+  - name: metrics
+    port: 9153
+    protocol: TCP
+  selector:
+    eks.amazonaws.com/component: coredns
+    k8s-app: kube-dns
+EOF
+same error 
+  kubectl delete mutatingwebhookconfiguration aws-load-balancer-webhook
+kubectl delete validatingwebhookconfiguration aws-load-balancer-webhook
+
+deployment.apps/coredns unchanged
+The Service "kube-dns" is invalid: spec.clusterIPs: Invalid value: ["10.100.0.10"]: failed to allocate IP 10.100.0.10: the provided network does not match the current range
+
+cat <<EOF | kubectl apply -f -
+apiVersion: v1
+kind: Service
+metadata:
+  name: kube-dns
+  namespace: kube-system
+  annotations:
+    prometheus.io/port: "9153"
+    prometheus.io/scrape: "true"
+  labels:
+    eks.amazonaws.com/component: coredns
+    k8s-app: kube-dns
+    kubernetes.io/cluster-service: "true"
+    kubernetes.io/name: CoreDNS
+spec:
+  # clusterIP is removed to let the cluster decide
+  ports:
+  - name: dns
+    port: 53
+    protocol: UDP
+  - name: dns-tcp
+    port: 53
+    protocol: TCP
+  - name: metrics
+    port: 9153
+    protocol: TCP
+  selector:
+    eks.amazonaws.com/component: coredns
+    k8s-app: kube-dns
+EOF
+kubectl get svc -n kube-system kube-dns
+kubectl rollout restart deployment coredns -n kube-system
+kubectl rollout restart deployment aws-load-balancer-controller -n kube-system
+kubectl get pods -n kube-system
+aws ec2 create-tags \
+  --resources subnet-0a03957301be7ca29 subnet-09c7bcc8bcd8bcb8d \
+  --tags Key=kubernetes.io/role/elb,Value=1 \
+  --region ap-south-1
+
+aws ec2 create-tags \
+  --resources subnet-063d76300d8e67ea4 subnet-0678dbb43f5333095 subnet-0a03957301be7ca29 subnet-09c7bcc8bcd8bcb8d \
+  --tags Key=kubernetes.io/cluster/node-cluster1,Value=shared \
+  --region ap-south-1
+  
+
+------------------------------------------------------------------
+eksctl create iamserviceaccount \
+  --cluster=node-cluster \
+  --namespace=kube-system \
+  --name=aws-load-balancer-controller \
+  --role-name AmazonEKSLoadBalancerControllerRole \
+  --attach-policy-arn=arn:aws:iam::723738378076:policy/AWSLoadBalancerControllerIAMPolicy \
+  --approve \
+  --region ap-south-1
+  
+eksctl utils associate-iam-oidc-provider \
+    --region ap-south-1 \
+    --cluster node-cluster \
+    --approve
+
+# Add the EKS repo
+helm repo add eks https://aws.github.io/eks-charts
+helm repo update
+
+# Install the controller
+helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
+  -n kube-system \
+  --set clusterName=node-cluster \
+  --set serviceAccount.create=false \
+  --set serviceAccount.name=aws-load-balancer-controller \
+  --set region=ap-south-1 \
+  --set vpcId=vpc-0c41b24ea76614c60
+  
+kubectl get pods -n kube-system --returned nothing
+
+aws eks describe-fargate-profile \
+  --cluster-name node-cluster \
+  --fargate-profile-name node \
+  --query 'fargateProfile.selectors'
+
+aws: [ERROR]: Could not connect to the endpoint URL: "https://eks.json.amazonaws.com/clusters/node-cluster/fargate-profiles/node"
+[ec2-user@ip-10-0-19-22 ecs]$ eksctl create fargateprofile \
+  --cluster node-cluster \
+  --name fp-kube-system \
+  --namespace kube-system
+Error: couldn't create cluster provider from command line options: could not create cluster provider from options: checking AWS STS access – cannot get role ARN for current session: operation error STS: GetCallerIdentity, https response error StatusCode: 0, RequestID: , request send failed, Post "https://sts.json.amazonaws.com/": dial tcp: lookup sts.json.amazonaws.com on 10.0.0.2:53: no such host
+
+region error in aws config file
+
+eksctl create fargateprofile \
+  --cluster node-cluster \
+  --name fp-kube-system \
+  --namespace kube-system
+
+Error: deployments.apps "coredns" not found
+
+aws eks create-addon \
+  --cluster-name node-cluster \
+  --addon-name coredns \
+  --region ap-south-1
+  
+cat <<EOF | kubectl apply -f -
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: coredns
+  namespace: kube-system
+data:
+  Corefile: |
+    .:53 {
+        errors
+        health
+        kubernetes cluster.local in-addr.arpa ip6.arpa {
+          pods insecure
+          fallthrough in-addr.arpa ip6.arpa
+        }
+        prometheus :9153
+        forward . /etc/resolv.conf
+        cache 30
+        loop
+        reload
+        loadbalance
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: coredns
+  namespace: kube-system
+  labels:
+    k8s-app: kube-dns
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      k8s-app: kube-dns
+  template:
+    metadata:
+      labels:
+        k8s-app: kube-dns
+    spec:
+      containers:
+      - name: coredns
+        image: coredns/coredns:1.10.1
+        args: [ "-conf", "/etc/coredns/Corefile" ]
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/coredns
+          readOnly: true
+      volumes:
+        - name: config-volume
+          configMap:
+            name: coredns
+            items:
+            - key: Corefile
+              path: Corefile
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kube-dns
+  namespace: kube-system
+  annotations:
+    prometheus.io/port: "9153"
+    prometheus.io/scrape: "true"
+  labels:
+    k8s-app: kube-dns
+    kubernetes.io/cluster-service: "true"
+    kubernetes.io/name: "CoreDNS"
+spec:
+  selector:
+    k8s-app: kube-dns
+  clusterIP: 10.100.0.10
+  ports:
+  - name: dns
+    port: 53
+    protocol: UDP
+  - name: dns-tcp
+    port: 53
+    protocol: TCP
+EOF
+
+EOF protocol: TCP00.0.10"CoreDNS": "true"refile" ]
+Warning: resource configmaps/coredns is missing the kubectl.kubernetes.io/last-applied-configuration annotation which is required by kubectl apply. kubectl apply should only be used on resources created declaratively by either kubectl create --save-config or kubectl apply. The missing annotation will be patched automatically.
+configmap/coredns configured
+deployment.apps/coredns created
+Error from server (InternalError): error when creating "STDIN": Internal error occurred: failed calling webhook "mservice.elbv2.k8s.aws": failed to call webhook: Post "https://aws-load-balancer-webhook-service.kube-system.svc:443/mutate-v1-service?timeout=10s": no endpoints available for service "aws-load-balancer-webhook-service"
+[ec2-user@ip-10-0-25-32 ~]$ 
+
+The error you're seeing now is actually a "good" sign of progress: it means your AWS Load Balancer Controller is trying to work, but it’s currently blocking itself.
+
+Because the controller uses a Webhook to validate your YAML, and the controller pods aren't running yet (due to the Fargate/CoreDNS issues we've been fighting), the Webhook is timing out. It’s essentially a "chicken and egg" problem.
+
+1. Disable the Webhook temporarily
+Since the Webhook is blocking the creation of other resources (like CoreDNS), we need to bypass it so the cluster can stabilize.
+
+Bash
+kubectl delete validatingwebhookconfiguration aws-load-balancer-webhook-configuration
+kubectl delete mutatingwebhookconfiguration aws-load-balancer-webhook-configuration
+
+Error from server (NotFound): validatingwebhookconfigurations.admissionregistration.k8s.io "aws-load-balancer-webhook-configuration" not found
+Error from server (NotFound): mutatingwebhookconfigurations.admissionregistration.k8s.io "aws-load-balancer-webhook-configuration" not found
+
+kubectl patch deployment coredns \
+  -n kube-system \
+  --type json \
+  -p='[{"op": "remove", "path": "/spec/template/metadata/annotations/eks.amazonaws.com~1compute-type"}]'
+The request is invalid: the server rejected our request due to an error in our request
+
+helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
+  -n kube-system \
+  --set clusterName=node-cluster \
+  --set serviceAccount.create=false \
+  --set serviceAccount.name=aws-load-balancer-controller \
+  --set region=ap-south-1 \
+  --set vpcId=vpc-09751db15de642a45
+  
+eksctl create iamserviceaccount \
+  --cluster=node-cluster \
+  --namespace=kube-system \
+  --name=aws-load-balancer-controller \
+  --role-name AmazonEKSLoadBalancerControllerRole \
+  --attach-policy-arn=arn:aws:iam::723738378076:policy/AWSLoadBalancerControllerIAMPolicy \
+  --approve \
+  --override-existing-serviceaccounts
+
+# 1. Download the official manifest for version 2.4.7
+curl -Lo v2_4_7_full.yaml https://github.com/kubernetes-sigs/aws-load-balancer-controller/releases/download/v2.4.7/v2_4_7_full.yaml
+
+# 2. Update the cluster name in the file
+sed -i 's/your-cluster-name/node-cluster/g' v2_4_7_full.yaml
+
+# 3. Apply the manifest
+kubectl apply -f v2_4_7_full.yaml
+  
+resource mapping not found for name: "aws-load-balancer-serving-cert" namespace: "kube-system" from "v2_4_7_full.yaml": no matches for kind "Certificate" in version "cert-manager.io/v1"
+ensure CRDs are installed first
+resource mapping not found for name: "aws-load-balancer-selfsigned-issuer" namespace: "kube-system" from "v2_4_7_full.yaml": no matches for kind "Issuer" in version "cert-manager.io/v1"
+ensure CRDs are installed first
+
+kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.13.2/cert-manager.yaml

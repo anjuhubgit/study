@@ -1,0 +1,308 @@
+Create vpc,subnets(2 public,2private,route tables, natgateway,internetgateway), region ap-south-1
+Create ECR repo in ap-south-1, 
+create EKS cluster with fargate , in eks cluster goto networking section and set security group rules
+Roles it should include is 
+EKS Cluster 
+Clusteriamrole- AmazonEKSBlockStoragePolicy
+              AmazonEKSClusterPolicy
+              AmazonEKSComputePolicy
+              AmazonEKSLoadBalancingPolicy
+              AmazonEKSNetworkingPolicy
+Nodeiamrole- 	AmazonEC2ContainerRegistryPullOnly
+                AmazonEKSWorkerNodeMinimalPolicy
+                AmazonElasticContainerRegistryPublicReadOnly			  
+fargate - AmazonEKSFargatePodExecutionRolePolicy
+create ec2 instance  build and push node js image to ECR
+install AWS CLI and Kubectl
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
+
+kubectl
+curl -O https://s3.us-west-2.amazonaws.com/amazon-eks/1.30.0/2024-05-12/bin/linux/amd64/kubectl
+chmod +x ./kubectl
+mkdir -p $HOME/bin && cp ./kubectl $HOME/bin/kubectl && export PATH=$HOME/bin:$PATH
+echo 'export PATH=$HOME/bin:$PATH' >> ~/.bashrc
+kubectl version --client
+
+login
+aws configure
+
+Connect to EKS 
+aws eks update-kubeconfig --region ap-south-1 --name node-cluster
+
+kubectl create namespace nodejs, deploy the deployment.yaml in nodejs namespace
+
+nodejs-deployment as deployment.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nodejs-deployment
+  namespace: nodejs  # Ensures it goes into the nodejs namespace
+  labels:
+    app: nodejs
+spec:
+  replicas: 2        # Number of pods to run
+  selector:
+    matchLabels:
+      app: nodejs
+  template:
+    metadata:
+      labels:
+        app: nodejs
+    spec:
+      containers:
+      - name: nodejs
+        image: 723738378076.dkr.ecr.ap-south-1.amazonaws.com/myimagerepo
+        ports:
+        - containerPort: 80
+		
+kubectl apply -f deployment.yaml -n nodejs
+
+The aws-logging ConfigMap is a specialized configuration used by Amazon EKS on Fargate to manage log routing.
+kubectl create namespace aws-logging
+configmap file as aws-logging-cm.yaml
+
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: aws-logging
+  namespace: aws-logging
+data:
+  flb_log_conf: |
+    [SERVICE]
+        Flush                     5
+        Grace                     30
+        Log_Level                 info
+        Daemon                    off
+        Parsers_File              parsers.conf
+        HTTP_Server               On
+        HTTP_Listen               0.0.0.0
+        HTTP_Port                 2020
+        Storage.path              /var/log/fluent-bit/storage
+        Storage.sync              normal
+        Storage.checksum          off
+        Storage.backlog.mem_limit 5M
+
+    [INPUT]
+        Name                tail
+        Tag                 kube.*
+        Path                /var/log/containers/*.log
+        Parser              docker
+        DB                  /var/log/fluent-bit/state/flb_container.db
+        Mem_Buf_Limit       5MB
+        Skip_Long_Lines     On
+        Refresh_Interval    10
+
+    [OUTPUT]
+        Name                cloudwatch_logs
+        Match               kube.*
+        region              ap-south-1
+        log_group_name      /aws/eks/node-cluster/fargate
+        log_stream_prefix   fargate-
+        auto_create_group   true
+  filters.conf: |
+    [FILTER]
+        Name                kubernetes
+        Match               kube.*
+        Merge_Log           On
+        Keep_Log            Off
+        Buffer_Size         0
+        Kube_Meta_Cache_TTL 300s
+		
+kubectl apply -f aws-logging-cm.yaml
+
+Before exposing ass tags to your private subnets
+Key: kubernetes.io/role/internal-elb
+Value: 1
+key: kubernetes.io/cluster/node-cluster
+value: shared (or owned)
+
+The AWS Load Balancer Controller is a controller that manages AWS Elastic Load Balancers.It bridges Kubernetes and AWS
+Install eksctl and helm
+# Download the latest version for your architecture (AMD64)
+curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
+Note: If you are using an ARM-based processor (like an AWS Graviton instance), replace amd64 with arm64.
+
+2. Move to Path
+Move the binary to /usr/local/bin so you can run the command from anywhere:
+
+Bash
+sudo mv /tmp/eksctl /usr/local/bin
+3. Verify the Installation
+Check that it’s working by asking for the version:
+Bash
+eksctl version
+
+# Download the installer script
+curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+
+# Give it permission to run
+chmod 700 get_helm.sh
+
+# Run the script
+./get_helm.sh
+
+
+Step 1: Create an IAM OIDC Provider
+Your cluster needs an OIDC (OpenID Connect) provider to allow Kubernetes service accounts to assume AWS IAM roles.
+
+Bash
+eksctl utils associate-iam-oidc-provider \
+    --region <REGION_CODE> \
+    --cluster <CLUSTER_NAME> \
+    --approve
+
+Step 2: Create the IAM Policy
+Download and create the policy that grants the controller the necessary permissions to manage ALBs and NLBs.
+
+Download the policy:
+
+Bash
+curl -o iam_policy.json https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/main/docs/install/iam_policy.json
+Create the policy in AWS:
+
+Bash
+aws iam create-policy \
+    --policy-name AWSLoadBalancerControllerIAMPolicy \
+    --policy-document file://iam_policy.json
+	
+Step 3: Create an IAM Role & Service Account
+This command creates a Kubernetes Service Account named aws-load-balancer-controller and links it to a new AWS IAM role with the policy you just created.
+
+Bash
+eksctl create iamserviceaccount \
+  --cluster=<CLUSTER_NAME> \
+  --namespace=kube-system \
+  --name=aws-load-balancer-controller \
+  --attach-policy-arn=arn:aws:iam::<AWS_ACCOUNT_ID>:policy/AWSLoadBalancerControllerIAMPolicy \
+  --approve
+  
+Step 4: Install the Controller via Helm
+Now that the permissions are set, you can deploy the actual controller software.
+
+Add the EKS repository:
+
+Bash
+helm repo add eks https://aws.github.io/eks-charts
+helm repo update
+Install the Custom Resource Definitions (CRDs):
+
+Bash
+kubectl apply -k "github.com/aws/eks-charts/stable/aws-load-balancer-controller//crds?ref=master"
+Install the Helm chart:
+
+Bash
+helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
+  -n kube-system \
+  --set clusterName=<CLUSTER_NAME> \
+  --set serviceAccount.create=false \
+  --set serviceAccount.name=aws-load-balancer-controller
+  
+verify
+kubectl get deployment -n kube-system aws-load-balancer-controller
+
+To expose the pod to public internet loadbalancer service is used
+service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: nodejs-service
+  namespace: nodejs
+spec:
+  selector:
+    app: nodejs       # This MUST match the label in your deployment
+  ports:
+    - protocol: TCP
+      port: 80       # Port the Load Balancer listens on
+      targetPort: 80 # Port the nodejs pod is listening on
+  type: LoadBalancer
+
+kubectl apply -f service.yaml
+kubectl get svc -n nodejs
+kubectl describe svc nodejs-service -n nodejs
+
+For error 
+Error: deployments.apps "coredns" not found
+
+cat <<EOF | kubectl apply -f -
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: coredns
+  namespace: kube-system
+data:
+  Corefile: |
+    .:53 {
+        errors
+        health
+        kubernetes cluster.local in-addr.arpa ip6.arpa {
+          pods insecure
+          fallthrough in-addr.arpa ip6.arpa
+        }
+        prometheus :9153
+        forward . /etc/resolv.conf
+        cache 30
+        loop
+        reload
+        loadbalance
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: coredns
+  namespace: kube-system
+  labels:
+    k8s-app: kube-dns
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      k8s-app: kube-dns
+  template:
+    metadata:
+      labels:
+        k8s-app: kube-dns
+    spec:
+      containers:
+      - name: coredns
+        image: coredns/coredns:1.10.1
+        args: [ "-conf", "/etc/coredns/Corefile" ]
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/coredns
+          readOnly: true
+      volumes:
+        - name: config-volume
+          configMap:
+            name: coredns
+            items:
+            - key: Corefile
+              path: Corefile
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kube-dns
+  namespace: kube-system
+  annotations:
+    prometheus.io/port: "9153"
+    prometheus.io/scrape: "true"
+  labels:
+    k8s-app: kube-dns
+    kubernetes.io/cluster-service: "true"
+    kubernetes.io/name: "CoreDNS"
+spec:
+  selector:
+    k8s-app: kube-dns
+  clusterIP: 10.100.0.10
+  ports:
+  - name: dns
+    port: 53
+    protocol: UDP
+  - name: dns-tcp
+    port: 53
+    protocol: TCP
+EOF
