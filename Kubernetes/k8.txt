@@ -1,0 +1,334 @@
+========================================================
+KUBERNETES + GITOPS ROADMAP (CHAPTER WISE – DEVOPS)
+========================================================
+
+========================================================
+PART A – KUBERNETES (CORE)
+========================================================
+
+CHAPTER 1 – Container & Kubernetes Fundamentals
+-----------------------------------------------
+1. What is a container?
+2. Why Kubernetes?
+3. Kubernetes vs Docker Swarm
+4. Kubernetes use cases
+5. Kubernetes architecture overview
+
+Concepts:
+- Cluster
+- Control Plane
+- Worker Nodes
+
+
+CHAPTER 2 – Kubernetes Architecture (VERY IMPORTANT)
+----------------------------------------------------
+1. API Server
+2. Scheduler
+3. Controller Manager
+4. etcd
+5. Kubelet
+6. Kube-proxy
+
+Interview Focus:
+- What happens when you run kubectl apply?
+- Role of etcd
+
+
+CHAPTER 3 – Kubernetes Installation & Access
+---------------------------------------------
+1. Managed Kubernetes (EKS, AKS, GKE)
+2. kubeconfig
+3. kubectl basics
+4. Cluster authentication & authorization
+
+Commands:
+- kubectl get nodes
+- kubectl config view
+- kubectl cluster-info
+
+
+CHAPTER 4 – Pods & Workloads
+----------------------------
+1. Pod
+2. Multi-container Pod
+3. Pod lifecycle
+4. Init containers
+5. Labels & selectors
+
+Commands:
+- kubectl run
+- kubectl describe pod
+- kubectl logs
+
+
+CHAPTER 5 – ReplicaSets & Deployments
+-------------------------------------
+1. ReplicaSet
+2. Deployment
+3. Rolling updates
+4. Rollbacks
+5. Deployment strategies
+   - Rolling
+   - Blue-Green
+   - Canary
+
+Commands:
+- kubectl apply
+- kubectl rollout status
+- kubectl rollout undo
+
+
+CHAPTER 6 – Services & Networking
+---------------------------------
+1. Service types
+   - ClusterIP
+   - NodePort
+   - LoadBalancer
+2. DNS in Kubernetes
+3. Pod-to-pod communication
+4. Ingress
+5. Ingress Controllers
+
+Commands:
+- kubectl get svc
+- kubectl get ingress
+
+
+CHAPTER 7 – Configurations & Secrets
+------------------------------------
+1. ConfigMaps
+2. Secrets
+3. Environment variables
+4. Volumes vs ConfigMaps
+5. Secret management best practices
+
+Commands:
+- kubectl create configmap
+- kubectl create secret
+
+
+CHAPTER 8 – Storage in Kubernetes
+---------------------------------
+1. Volumes
+2. Persistent Volumes (PV)
+3. Persistent Volume Claims (PVC)
+4. Storage Classes
+5. StatefulSets
+
+Interview Focus:
+- PV vs PVC
+- When to use StatefulSets
+
+
+CHAPTER 9 – Scheduling & Resource Management
+--------------------------------------------
+1. Resource requests & limits
+2. Node selectors
+3. Taints & tolerations
+4. Affinity & anti-affinity
+5. QoS classes
+
+Commands:
+- kubectl describe node
+- kubectl top pod
+
+
+CHAPTER 10 – Scaling & High Availability
+----------------------------------------
+1. Horizontal Pod Autoscaler (HPA)
+2. Vertical Pod Autoscaler (VPA)
+3. Cluster Autoscaler
+4. Pod Disruption Budget (PDB)
+
+Practice:
+- Configure HPA
+- Test auto-scaling
+
+
+CHAPTER 11 – Kubernetes Security (INTERVIEW GOLD)
+-------------------------------------------------
+1. RBAC
+2. Service Accounts
+3. Network Policies
+4. Pod Security Standards
+5. Image security basics
+
+Commands:
+- kubectl auth can-i
+- kubectl get rolebindings
+
+
+CHAPTER 12 – Monitoring & Logging
+---------------------------------
+1. Kubernetes metrics
+2. Metrics Server
+3. Prometheus overview
+4. Grafana overview
+5. Centralized logging concepts
+
+Interview Focus:
+- How do you monitor a cluster?
+- Debugging slow pods
+
+
+CHAPTER 13 – Kubernetes Troubleshooting
+---------------------------------------
+1. Pod CrashLoopBackOff
+2. ImagePullBackOff
+3. Pending pods
+4. Service not reachable
+5. Node NotReady
+
+Commands:
+- kubectl describe
+- kubectl logs
+- kubectl exec
+
+
+========================================================
+PART B – GITOPS (PRODUCTION READY)
+========================================================
+
+CHAPTER 14 – GitOps Fundamentals
+--------------------------------
+1. What is GitOps?
+2. GitOps vs CI/CD
+3. Desired state vs actual state
+4. Git as single source of truth
+5. Pull-based vs push-based model
+
+
+CHAPTER 15 – GitOps Architecture
+--------------------------------
+1. Git repository structure
+2. Environment separation (dev/stage/prod)
+3. Branching strategy
+4. Multi-cluster GitOps
+5. Secrets handling in GitOps
+
+
+CHAPTER 16 – GitOps Tools
+-------------------------
+1. Argo CD
+2. Flux CD
+3. Helm with GitOps
+4. Kustomize
+
+Tool Comparison:
+- ArgoCD vs FluxCD
+- Helm vs Kustomize
+
+
+CHAPTER 17 – Argo CD Deep Dive
+------------------------------
+1. Argo CD architecture
+2. Application CRD
+3. Sync policies
+   - Manual
+   - Auto
+4. Health & sync status
+5. Rollback in Argo CD
+
+Practice:
+- Deploy app using Argo CD
+- Sync & rollback
+
+
+CHAPTER 18 – GitOps Workflow (REAL WORLD)
+-----------------------------------------
+1. Developer commits code
+2. CI builds image
+3. Image pushed to registry
+4. Manifest updated in Git
+5. Argo CD syncs cluster
+6. Drift detection & correction
+
+Interview Focus:
+- How GitOps avoids manual kubectl
+- Drift handling
+
+
+CHAPTER 19 – Secrets in GitOps
+------------------------------
+1. Why secrets are challenging
+2. Sealed Secrets
+3. External Secrets Operator
+4. Vault integration
+5. Azure Key Vault / AWS Secrets Manager
+
+Practice:
+- Manage secrets securely
+- Rotate secrets
+
+
+CHAPTER 20 – GitOps Security & Governance
+-----------------------------------------
+1. RBAC in Argo CD
+2. Audit trails
+3. Approval workflows
+4. Multi-tenant clusters
+5. Compliance enforcement
+
+
+CHAPTER 21 – GitOps Troubleshooting
+-----------------------------------
+1. Application OutOfSync
+2. Sync failures
+3. Wrong image deployed
+4. Broken manifest
+5. Rollback strategies
+
+
+========================================================
+REAL-WORLD KUBERNETES + GITOPS SCENARIOS
+========================================================
+1. Pod running but service not reachable
+2. Deployment stuck during rollout
+3. HPA not scaling
+4. Secrets leaked in Git
+5. Argo CD OutOfSync issue
+6. Wrong version deployed to prod
+7. Manual kubectl change reverted by GitOps
+8. Multi-env deployment mistake
+
+
+========================================================
+FINAL OUTCOME
+========================================================
+After this roadmap, candidate should:
+- Confidently work with Kubernetes clusters
+- Deploy applications using GitOps
+- Avoid manual production changes
+- Troubleshoot real production issues
+- Crack Kubernetes & GitOps interviews
+
+END.
+========================================================
+ment
+
+
+CHAPTER 21 – GitOps Troubleshooting
+-----------------------------------
+1. Application OutOfSync
+2. Sync failures
+3. Wrong image deployed
+4. Broken manifest
+5. Rollback strategies
+
+
+========================================================
+REAL-WORLD KUBERNETES + GITOPS SCENARIOS
+========================================================
+1. Pod running but service not reachable
+2. Deployment stuck during rollout
+3. HPA not scaling
+4. Secrets leaked in Git
+5. Argo CD OutOfSync issue
+6. Wrong version deployed to prod
+7. Manual kubectl change reverted by GitOps
+8. Multi-env deployment mistake
+
+
+========================================================
+FINAL OUTCOME
+=========================
